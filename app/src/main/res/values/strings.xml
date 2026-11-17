@@ -157,4 +157,15 @@
     <string name="dialog_cancel">Отмена</string>
     <string name="admin_course_deleted">Курс удалён из каталога.</string>
     <string name="admin_course_delete_blocked">Нельзя удалить курс: он присутствует в истории заказов.</string>
+    <string name="auth_demo_admin_button">Войти как администратор</string>
+    <string name="auth_demo_admin_unavailable">Демо-аккаунт администратора недоступен. Перезапусти приложение.</string>
+    <string name="admin_access_title">Администрирование</string>
+    <string name="admin_access_subtitle">Управление курсами и заказами</string>
+    <string name="admin_access_description">Открой отдельную панель для создания, изменения и удаления курсов, а также управления статусами заказов.</string>
+    <string name="appearance_title">Внешний вид</string>
+    <string name="appearance_subtitle">Выбери оформление приложения</string>
+    <string name="appearance_current">Текущий режим: %1$s</string>
+    <string name="appearance_system">Системная</string>
+    <string name="appearance_light">Светлая</string>
+    <string name="appearance_dark">Тёмная</string>
 </resources>
