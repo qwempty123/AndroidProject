@@ -102,19 +102,36 @@ class CourseMarketDatabaseTest {
     }
 
     @Test
-    fun demoAdminAccountAlwaysHasAdminRoleAndCanSignIn() = runBlocking {
+    fun demoAdminAccountIsPromotedAndCanSignIn() = runBlocking {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         context.deleteDatabase(CourseMarketDatabase.DATABASE_NAME)
+
+        // Simulate an older installation that already has the reserved demo
+        // login but still stores it with the regular CLIENT role.
+        val helper = CourseMarketDatabase(context)
+        val salt = PasswordSecurity.newSalt()
+        val values = android.content.ContentValues().apply {
+            put("username", CourseMarketDatabase.DEFAULT_ADMIN_USERNAME)
+            put("password_salt", salt)
+            put(
+                "password_hash",
+                PasswordSecurity.hash(CourseMarketDatabase.DEFAULT_ADMIN_PASSWORD, salt)
+            )
+            put("role", "CLIENT")
+        }
+        helper.writableDatabase.insertOrThrow("users", null, values)
+        helper.ensureAdminAccount()
+        val storedRole = helper.readableDatabase.rawQuery(
+            "SELECT role FROM users WHERE username = ?",
+            arrayOf(CourseMarketDatabase.DEFAULT_ADMIN_USERNAME)
+        ).use { cursor ->
+            if (cursor.moveToFirst()) cursor.getString(0) else null
+        }
+        helper.close()
+
+        assertEquals("ADMIN", storedRole)
+
         val repository = CourseMarketRepository(context)
-
-        // Simulate an older local database where the reserved login existed
-        // with a regular-user role before admin seeding was applied.
-        repository.register(
-            CourseMarketDatabase.DEFAULT_ADMIN_USERNAME,
-            CourseMarketDatabase.DEFAULT_ADMIN_PASSWORD
-        )
-        repository.initialize(emptyList())
-
         val admin = repository.login(
             CourseMarketDatabase.DEFAULT_ADMIN_USERNAME,
             CourseMarketDatabase.DEFAULT_ADMIN_PASSWORD
