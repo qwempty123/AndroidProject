@@ -227,11 +227,20 @@ class CourseMarketDatabase(context: Context) :
 
     fun ensureAdminAccount() {
         val db = writableDatabase
-        db.rawQuery(
+        val existingAdminId = db.rawQuery(
             "SELECT id FROM users WHERE username = ? COLLATE NOCASE",
             arrayOf(DEFAULT_ADMIN_USERNAME)
         ).use { cursor ->
-            if (cursor.moveToFirst()) return
+            if (cursor.moveToFirst()) cursor.getLong(0) else -1L
+        }
+        if (existingAdminId > 0L) {
+            // Keep the reserved demo account available as an administrator even
+            // if an older local database created it before role seeding.
+            db.execSQL(
+                "UPDATE users SET role = 'ADMIN' WHERE id = ?",
+                arrayOf(existingAdminId)
+            )
+            return
         }
         val salt = PasswordSecurity.newSalt()
         val values = ContentValues().apply {
