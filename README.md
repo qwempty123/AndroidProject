@@ -85,6 +85,12 @@ Workflow **Android build and tests** выполняет unit-тесты и со�
 - Android-телефон: скачать `app-debug.apk` из успешного GitHub Actions artifact, передать APK на устройство и установить.
 - APK предназначен для Android и не запускается напрямую в Windows без эмулятора.
 
+## Оставшиеся действия перед полной сдачей
+
+- [Создать GitHub Projects Kanban board](https://github.com/qwempty123/AndroidProject/issues/1).
+- [Добавить реальные скриншоты в README](https://github.com/qwempty123/AndroidProject/issues/2).
+- [Опубликовать APK как GitHub Release v1.0.0](https://github.com/qwempty123/AndroidProject/issues/3).
+
 ## Документация
 
 - [Анализ предметной области](doc/domain_analysis.md)
