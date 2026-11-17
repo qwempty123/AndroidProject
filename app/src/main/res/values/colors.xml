@@ -15,4 +15,19 @@
     <color name="course_accent">#6D4BC3</color>
     <color name="course_text_primary">#241E32</color>
     <color name="course_text_secondary">#756E86</color>
+    <color name="auth_error">#B3261E</color>
+    <color name="divider_color">#DED8EA</color>
+    <color name="text_on_gradient">#E2DEEC</color>
+    <color name="validation_error">#B3261E</color>
+    <color name="course_artwork_text">#FFFFFF</color>
+    <color name="lesson_answer_text">#514B83</color>
+    <color name="lesson_answer_surface">#EEEAF7</color>
+    <color name="lesson_answer_error">#B3261E</color>
+    <color name="button_text_on_accent">#FFFFFF</color>
+    <color name="home_gradient_start">#302747</color>
+    <color name="home_gradient_end">#4B3C68</color>
+    <color name="profile_gradient_start">#302747</color>
+    <color name="profile_gradient_end">#42365E</color>
+    <color name="course_gradient_end">#282538</color>
+    <color name="lesson_gradient_end">#29263A</color>
 </resources>
