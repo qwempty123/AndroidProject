@@ -16,6 +16,12 @@
 3. Создай поля/столбцы: Backlog, In Progress, Review, Done.
 4. Добавь Issues репозитория как карточки и перемещай их по мере выполнения.
 
+## Заведённые GitHub Issues для переноса на доску
+
+- [#1 — Создать и заполнить GitHub Projects Kanban board](https://github.com/qwempty123/AndroidProject/issues/1)
+- [#2 — Добавить реальные скриншоты приложения в README](https://github.com/qwempty123/AndroidProject/issues/2)
+- [#3 — Опубликовать APK в GitHub Release v1.0.0](https://github.com/qwempty123/AndroidProject/issues/3)
+
 ## Текущее ограничение
 
-В репозитории хранится текстовый план. Саму GitHub Projects board необходимо создать в интерфейсе GitHub; наличие этого файла не означает, что доска уже создана.
+Три оставшихся действия заведены как GitHub Issues, готовые для добавления в Projects. Саму GitHub Projects board необходимо создать в интерфейсе GitHub; наличие Issues и этого файла не означает, что доска уже создана.
