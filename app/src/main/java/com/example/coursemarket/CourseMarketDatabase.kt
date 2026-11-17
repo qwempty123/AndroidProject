@@ -262,8 +262,13 @@ internal object PasswordSecurity {
         val salt = android.util.Base64.decode(saltBase64, android.util.Base64.NO_WRAP)
         val spec = javax.crypto.spec.PBEKeySpec(password.toCharArray(), salt, 120_000, 256)
         return try {
+            val algorithm = if (android.os.Build.VERSION.SDK_INT >= 26) {
+                "PBKDF2WithHmacSHA256"
+            } else {
+                "PBKDF2WithHmacSHA1"
+            }
             val bytes = javax.crypto.SecretKeyFactory
-                .getInstance("PBKDF2WithHmacSHA256")
+                .getInstance(algorithm)
                 .generateSecret(spec)
                 .encoded
             android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP)
