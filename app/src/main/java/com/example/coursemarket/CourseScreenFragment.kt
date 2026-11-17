@@ -44,7 +44,7 @@ class CourseScreenFragment : Fragment() {
         }
         scroll.addView(
             contentContainer,
-            ScrollView.LayoutParams(
+            ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
