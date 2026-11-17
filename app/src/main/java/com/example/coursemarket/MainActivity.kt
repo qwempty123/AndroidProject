@@ -1854,7 +1854,26 @@ class MainActivity : AppCompatActivity() {
         currentTab = "Профиль"
         currentLearningCourseId = course.id
         currentLearningLessonIndex = lessonIndex
-        val lesson = CourseLearningContent.get(course.id, lessonIndex, course.modules[lessonIndex])
+        uiScope.launch {
+            try {
+                val lesson = repository.getLessonContent(course.id, lessonIndex)
+                    ?: CourseLearningContent.get(course.id, lessonIndex, course.modules[lessonIndex])
+                renderLessonContent(course, lessonIndex, lesson)
+            } catch (error: Exception) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Не удалось загрузить урок из базы данных.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun renderLessonContent(
+        course: Course,
+        lessonIndex: Int,
+        lesson: CourseLessonContent
+    ) {
         val completed = progressFor(course)
         val wasCompleted = lessonIndex in completed
         render(lesson.title, course.title + "  •  Урок " + (lessonIndex + 1) + " из " + course.modules.size)
