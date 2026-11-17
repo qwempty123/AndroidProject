@@ -30,6 +30,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -367,7 +368,19 @@ class MainActivity : AppCompatActivity() {
             val loginValue = username.text.toString().trim()
             val passwordValue = password.text.toString()
             feedback.text = ""
+            username.error = null
+            password.error = null
             uiScope.launch {
+                if (loginValue.isBlank()) {
+                    username.error = getString(R.string.auth_username_required)
+                    username.requestFocus()
+                    return@launch
+                }
+                if (passwordValue.isBlank()) {
+                    password.error = getString(R.string.auth_password_required)
+                    password.requestFocus()
+                    return@launch
+                }
                 try {
                     val account = if (registerMode) {
                         repository.register(loginValue, passwordValue)
@@ -380,7 +393,7 @@ class MainActivity : AppCompatActivity() {
                         enterAuthenticatedApp(account, restore = false)
                     }
                 } catch (error: Exception) {
-                    feedback.text = error.message ?: "Не удалось выполнить вход."
+                    feedback.text = error.message ?: getString(R.string.auth_generic_error)
                 }
             }
         }, LinearLayout.LayoutParams(-1, dp(48)))
@@ -1302,12 +1315,9 @@ class MainActivity : AppCompatActivity() {
             actions.addView(hSpace(7))
             actions.addView(button(getString(R.string.admin_delete), false, compact = true) {
                 AlertDialog.Builder(this@MainActivity)
-                    .setTitle("Удалить курс?")
-                    .setMessage(
-                        "Курс «" + course.title + "» будет удалён из каталога. " +
-                            "Если на него уже оформлялись заказы, удаление заблокирует ограничение внешнего ключа."
-                    )
-                    .setNegativeButton("Отмена", null)
+                     .setTitle(getString(R.string.admin_delete_course_title))
+                    .setMessage(getString(R.string.admin_delete_course_message, course.title))
+                    .setNegativeButton(getString(R.string.dialog_cancel), null)
                     .setPositiveButton("Удалить") { _, _ ->
                         uiScope.launch {
                             val deleted = repository.deleteCourse(course.id)
@@ -1319,10 +1329,15 @@ class MainActivity : AppCompatActivity() {
                                 courses = repository.getCourses()
                                 saveState()
                                 showAdmin()
+                                Snackbar.make(
+                                    root,
+                                    getString(R.string.admin_course_deleted),
+                                    Snackbar.LENGTH_LONG
+                                ).show()
                             } else {
                                 Toast.makeText(
                                     this@MainActivity,
-                                    "Нельзя удалить курс: он присутствует в истории заказов.",
+                                    getString(R.string.admin_course_delete_blocked),
                                     Toast.LENGTH_LONG
                                 ).show()
                             }
