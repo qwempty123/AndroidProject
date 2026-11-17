@@ -24,6 +24,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.FragmentContainerView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -186,6 +187,15 @@ class MainActivity : AppCompatActivity() {
     private val prefs by lazy { getSharedPreferences("course_market", MODE_PRIVATE) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val savedThemeMode = getSharedPreferences("course_market", MODE_PRIVATE)
+            .getString("theme_mode", "system") ?: "system"
+        AppCompatDelegate.setDefaultNightMode(
+            when (savedThemeMode) {
+                "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+                "light" -> AppCompatDelegate.MODE_NIGHT_NO
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
         super.onCreate(savedInstanceState)
         restoredTab = savedInstanceState?.getString("screen_tab") ?: "Главная"
         restoredCategory = savedInstanceState?.getString("screen_category") ?: "Все"
@@ -410,9 +420,39 @@ class MainActivity : AppCompatActivity() {
         card.addView(vSpace(16))
         card.addView(text(getString(R.string.auth_demo_admin), 10, gold))
         card.addView(text(getString(R.string.admin_demo_hint), 10, textSecondary))
+        card.addView(vSpace(10))
+        card.addView(button(getString(R.string.auth_demo_admin_button), false) {
+            uiScope.launch {
+                try {
+                    val admin = repository.login(
+                        CourseMarketDatabase.DEFAULT_ADMIN_USERNAME,
+                        CourseMarketDatabase.DEFAULT_ADMIN_PASSWORD
+                    )
+                    if (admin?.isAdmin == true) {
+                        enterAuthenticatedApp(admin, restore = false)
+                    } else {
+                        feedback.text = getString(R.string.auth_demo_admin_unavailable)
+                    }
+                } catch (error: Exception) {
+                    feedback.text = error.message ?: getString(R.string.auth_generic_error)
+                }
+            }
+        }, LinearLayout.LayoutParams(-1, dp(44)))
         scroll.addView(card)
         authRoot.addView(scroll, LinearLayout.LayoutParams(-1, -1))
         setContentView(authRoot)
+    }
+
+    private fun setThemeMode(mode: String) {
+        prefs.edit().putString("theme_mode", mode).apply()
+        val nightMode = when (mode) {
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        if (AppCompatDelegate.getDefaultNightMode() != nightMode) {
+            AppCompatDelegate.setDefaultNightMode(nightMode)
+        }
     }
 
     private fun logout() {
@@ -702,7 +742,19 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        sortRow.addView(text(getString(R.string.catalog_sort), 12, textSecondary), LinearLayout.LayoutParams(0, -2, 1f))
+        sortRow.addView(
+            text(getString(R.string.catalog_sort), 12, textSecondary),
+            LinearLayout.LayoutParams(-2, -2)
+        )
+        val sortChipScroll = HorizontalScrollView(this).apply {
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+            clipToPadding = false
+        }
+        val sortChips = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
         listOf("Популярные", "Дешевле", "Дороже").forEach { sort ->
             val active = selectedSort == sort
             val chip = button(sort, active, compact = true) {
@@ -710,10 +762,12 @@ class MainActivity : AppCompatActivity() {
                 showCatalog()
             }
             val lp = LinearLayout.LayoutParams(-2, dp(34))
-            lp.marginStart = dp(5)
-            sortRow.addView(chip, lp)
+            lp.marginStart = dp(6)
+            sortChips.addView(chip, lp)
         }
-        contentBox.addView(sortRow)
+        sortChipScroll.addView(sortChips, LinearLayout.LayoutParams(-2, -1))
+        sortRow.addView(sortChipScroll, LinearLayout.LayoutParams(0, dp(40), 1f))
+        contentBox.addView(sortRow, LinearLayout.LayoutParams(-1, dp(40)))
         contentBox.addView(vSpace(14))
 
         val results = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -1106,12 +1160,69 @@ class MainActivity : AppCompatActivity() {
         contentBox.addView(panel)
 
         if (currentUser?.isAdmin == true) {
-            contentBox.addView(vSpace(10))
-            contentBox.addView(button(
+            sectionTitle(
+                getString(R.string.admin_access_title),
+                getString(R.string.admin_access_subtitle)
+            )
+            val adminCard = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                background = rounded(surface, 15)
+                setPadding(dp(14), dp(13), dp(14), dp(13))
+            }
+            adminCard.addView(text(
+                getString(R.string.admin_access_description),
+                12,
+                textSecondary
+            ))
+            adminCard.addView(vSpace(10))
+            adminCard.addView(button(
                 getString(R.string.admin_panel) + "  →",
                 true
             ) { navigate("Админ") }, matchWrap())
+            contentBox.addView(adminCard, matchWrap())
         }
+
+        sectionTitle(
+            getString(R.string.appearance_title),
+            getString(R.string.appearance_subtitle)
+        )
+        val themeMode = prefs.getString("theme_mode", "system") ?: "system"
+        val themeLabel = when (themeMode) {
+            "dark" -> getString(R.string.appearance_dark)
+            "light" -> getString(R.string.appearance_light)
+            else -> getString(R.string.appearance_system)
+        }
+        val appearanceCard = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = rounded(surface, 15)
+            setPadding(dp(13), dp(12), dp(13), dp(12))
+        }
+        appearanceCard.addView(text(
+            getString(R.string.appearance_current, themeLabel),
+            11,
+            textSecondary
+        ))
+        appearanceCard.addView(vSpace(9))
+        val themeButtons = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+        listOf(
+            Triple("system", getString(R.string.appearance_system), R.string.appearance_system),
+            Triple("light", getString(R.string.appearance_light), R.string.appearance_light),
+            Triple("dark", getString(R.string.appearance_dark), R.string.appearance_dark)
+        ).forEachIndexed { index, option ->
+            val mode = option.first
+            val action = button(
+                option.second,
+                themeMode == mode,
+                compact = true
+            ) { setThemeMode(mode) }
+            val lp = LinearLayout.LayoutParams(0, dp(42), 1f)
+            if (index > 0) lp.marginStart = dp(6)
+            themeButtons.addView(action, lp)
+        }
+        appearanceCard.addView(themeButtons, matchWrap())
+        contentBox.addView(appearanceCard, matchWrap())
 
         sectionTitle(getString(R.string.profile_stats_title), getString(R.string.profile_stats_caption))
         val totalCompleted = completedLessons.values.sumOf { it.size }
@@ -2170,7 +2281,10 @@ class MainActivity : AppCompatActivity() {
     ): TextView = text(label, if (compact) 11 else 13, if (primary) getColor(R.color.button_text_on_accent) else textPrimary, true).apply {
         gravity = Gravity.CENTER
         minHeight = dp(42)
-        setPadding(dp(if (compact) 10 else 14), dp(1), dp(if (compact) 10 else 14), dp(1))
+        minWidth = 0
+        maxLines = if (compact) 1 else 2
+        ellipsize = android.text.TextUtils.TruncateAt.END
+        setPadding(dp(if (compact) 8 else 14), dp(1), dp(if (compact) 8 else 14), dp(1))
         background = rounded(if (primary) accent else surfaceAlt, 12)
         isClickable = true
         isFocusable = true
