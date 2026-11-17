@@ -886,28 +886,36 @@ class MainActivity : AppCompatActivity() {
             JSONArray()
         }
         if (orders.length() > 0) {
-            val lastOrder = orders.optJSONObject(orders.length() - 1)
-            if (lastOrder != null) {
-                sectionTitle("Последний заказ", "История демонстрационного оформления")
+            sectionTitle("История заказов", orders.length().toString() + " оформлено на этом устройстве")
+            for (index in orders.length() - 1 downTo 0) {
+                val order = orders.optJSONObject(index) ?: continue
                 val receipt = LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
                     background = rounded(surface, 15)
-                    setPadding(dp(15), dp(14), dp(15), dp(14))
+                    setPadding(dp(14), dp(13), dp(14), dp(13))
                 }
-                receipt.addView(text(lastOrder.optString("id"), 14, accent, true))
+                val header = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                }
+                header.addView(text(order.optString("id"), 13, accent, true),
+                    LinearLayout.LayoutParams(0, -2, 1f))
+                header.addView(text(money(order.optInt("total")), 14, textPrimary, true))
+                receipt.addView(header)
+                receipt.addView(vSpace(6))
+                receipt.addView(text(
+                    order.optString("date") + "  •  " + order.optString("method"),
+                    10, textSecondary
+                ))
                 receipt.addView(vSpace(5))
                 receipt.addView(text(
-                    lastOrder.optString("date") + "  •  " + lastOrder.optString("method"),
-                    11, textSecondary
-                ))
-                receipt.addView(vSpace(7))
-                receipt.addView(text(
-                    "Сумма: " + money(lastOrder.optInt("total")),
-                    16, textPrimary, true
+                    "Курсов в заказе: " + (order.optJSONArray("courseIds")?.length() ?: 0),
+                    10, textSecondary
                 ))
                 receipt.addView(vSpace(5))
-                receipt.addView(text("Статус: демонстрационный заказ, без списания средств.", 10, gold))
-                contentBox.addView(receipt)
+                receipt.addView(text("Демо-заказ: списания средств не было.", 10, gold))
+                contentBox.addView(receipt, matchWrap())
+                contentBox.addView(vSpace(8))
             }
         }
 
