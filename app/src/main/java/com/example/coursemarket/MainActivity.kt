@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
             setHintTextColor(muted)
             setTextColor(white)
             textSize = 14f
-            singleLine = true
+            setSingleLine(true)
             inputType = InputType.TYPE_CLASS_TEXT
             setPadding(dp(14), 0, dp(14), 0)
             background = rounded(surface, 14)
