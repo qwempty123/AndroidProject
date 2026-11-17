@@ -60,15 +60,15 @@ data class Course(
 
 class MainActivity : AppCompatActivity() {
 
-    private val bg = Color.rgb(18, 18, 25)
-    private val surface = Color.rgb(29, 29, 40)
-    private val surfaceAlt = Color.rgb(39, 37, 52)
-    private val accent = Color.rgb(181, 156, 255)
-    private val accentDark = Color.rgb(45, 37, 67)
-    private val textPrimary = Color.rgb(247, 245, 252)
-    private val textSecondary = Color.rgb(167, 164, 184)
-    private val success = Color.rgb(132, 210, 170)
-    private val gold = Color.rgb(244, 202, 129)
+    private val bg: Int get() = getColor(R.color.background)
+    private val surface: Int get() = getColor(R.color.surface)
+    private val surfaceAlt: Int get() = getColor(R.color.surface_alt)
+    private val accent: Int get() = getColor(R.color.accent)
+    private val accentDark: Int get() = getColor(R.color.accent_dark)
+    private val textPrimary: Int get() = getColor(R.color.text_primary)
+    private val textSecondary: Int get() = getColor(R.color.text_secondary)
+    private val success: Int get() = getColor(R.color.success)
+    private val gold: Int get() = getColor(R.color.gold)
 
     private var courses: List<Course> = listOf(
         Course(
@@ -1567,7 +1567,7 @@ class MainActivity : AppCompatActivity() {
         card.addView(vSpace(5))
         card.addView(text("Автор: " + course.author, 11, textSecondary))
         card.addView(vSpace(8))
-        card.addView(text(course.description, 12, Color.rgb(194, 191, 207)).apply {
+        card.addView(text(course.description, 12, textSecondary).apply {
             maxLines = 3
             setLineSpacing(dp(1).toFloat(), 1.0f)
         })
@@ -1652,7 +1652,7 @@ class MainActivity : AppCompatActivity() {
         body.addView(vSpace(8))
         body.addView(text("Автор: " + course.author, 12, textSecondary))
         body.addView(vSpace(11))
-        body.addView(text(course.description, 13, Color.rgb(210, 207, 221)))
+        body.addView(text(course.description, 13, textSecondary))
         body.addView(vSpace(15))
 
         val facts = LinearLayout(this).apply {
@@ -2134,4 +2134,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun dp(value: Int): Int =
         (value * resources.displayMetrics.density).toInt()
+
+    private companion object {
+        const val NAV_HOME = 101
+        const val NAV_CATALOG = 102
+        const val NAV_FAVORITES = 103
+        const val NAV_CART = 104
+        const val NAV_PROFILE = 105
+    }
 }
