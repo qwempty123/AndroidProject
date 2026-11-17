@@ -20,11 +20,12 @@ PowerShell из корня проекта:
 ## Вариант B. Установка APK на Android-телефон
 
 1. Собрать debug APK командой выше или скачать артефакт GitHub Actions из успешного workflow.
-2. В GitHub открыть **Actions → Android build and tests → успешный запуск → Artifacts → CourseMarket-debug-apk**.
-3. Скачать ZIP-архив и извлечь `app-debug.apk`.
-4. Передать APK на Android-телефон (USB, локальная сеть или облачное хранилище).
-5. Открыть APK на телефоне и подтвердить установку из этого источника, если Android запросит разрешение.
-6. Запустить CourseMarket.
+2. Для временной сборки открыть **Actions → Android build and tests → успешный запуск → Artifacts → CourseMarket-debug-apk**.
+3. Для постоянной публикации открыть **Actions → Publish CourseMarket APK Release → Run workflow**, указать тег версии (например, `v1.0.0`) и дождаться завершения. В созданном GitHub Release скачать `app-debug.apk` в разделе Assets.
+4. Для временной сборки скачать ZIP-архив и извлечь `app-debug.apk`.
+5. Передать APK на Android-телефон (USB, локальная сеть или облачное хранилище).
+6. Открыть APK на телефоне и подтвердить установку из этого источника, если Android запросит разрешение.
+7. Запустить CourseMarket.
 
 APK — Android-приложение: напрямую в Windows без Android Emulator оно не запускается.
 
