@@ -168,4 +168,8 @@
     <string name="appearance_system">Системная</string>
     <string name="appearance_light">Светлая</string>
     <string name="appearance_dark">Тёмная</string>
+    <string name="admin_demo_switch_title">Демо-доступ администратора</string>
+    <string name="admin_demo_switch_subtitle">Нужна панель управления?</string>
+    <string name="admin_demo_switch_description">Обычная учётная запись не имеет прав администратора. Для проверки административных функций можно переключиться на встроенный локальный демо-аккаунт.</string>
+    <string name="admin_demo_switch_button">Переключиться на администратора</string>
 </resources>
