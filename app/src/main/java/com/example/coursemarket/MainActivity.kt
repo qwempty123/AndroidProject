@@ -1180,6 +1180,51 @@ class MainActivity : AppCompatActivity() {
                 true
             ) { navigate("Админ") }, matchWrap())
             contentBox.addView(adminCard, matchWrap())
+        } else {
+            sectionTitle(
+                getString(R.string.admin_demo_switch_title),
+                getString(R.string.admin_demo_switch_subtitle)
+            )
+            val demoAdminCard = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                background = rounded(surface, 15)
+                setPadding(dp(14), dp(13), dp(14), dp(13))
+            }
+            demoAdminCard.addView(text(
+                getString(R.string.admin_demo_switch_description),
+                12,
+                textSecondary
+            ))
+            demoAdminCard.addView(vSpace(10))
+            demoAdminCard.addView(button(
+                getString(R.string.admin_demo_switch_button),
+                false
+            ) {
+                uiScope.launch {
+                    try {
+                        val admin = repository.login(
+                            CourseMarketDatabase.DEFAULT_ADMIN_USERNAME,
+                            CourseMarketDatabase.DEFAULT_ADMIN_PASSWORD
+                        )
+                        if (admin?.isAdmin == true) {
+                            enterAuthenticatedApp(admin, restore = true)
+                        } else {
+                            Toast.makeText(
+                                this@MainActivity,
+                                getString(R.string.auth_demo_admin_unavailable),
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    } catch (error: Exception) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            error.message ?: getString(R.string.auth_generic_error),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }, matchWrap())
+            contentBox.addView(demoAdminCard, matchWrap())
         }
 
         sectionTitle(
