@@ -447,41 +447,33 @@ class MainActivity : AppCompatActivity() {
         scroll.addView(contentBox)
         root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
 
-        val tabs = listOf(
-            "Главная" to "⌂",
-            "Каталог" to "▦",
-            "Избранное" to "♡",
-            "Корзина" to "▣",
-            "Профиль" to "●"
-        )
-        val nav = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
+        bottomNavigation = BottomNavigationView(this).apply {
             background = rounded(surface, 18)
-            setPadding(dp(4), dp(5), dp(4), dp(5))
-        }
-        val map = linkedMapOf<String, LinearLayout>()
-        tabs.forEach { (tab, symbol) ->
-            val item = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                background = rounded(Color.TRANSPARENT, 12)
-                isClickable = true
-                isFocusable = true
-                setPadding(dp(2), dp(5), dp(2), dp(5))
-                setOnClickListener { navigate(tab) }
+            labelVisibilityMode = BottomNavigationView.LABEL_VISIBILITY_LABELED
+            itemHorizontalTranslationEnabled = false
+            menu.add(0, NAV_HOME, 0, getString(R.string.nav_home))
+                .setIcon(android.R.drawable.ic_menu_view)
+            menu.add(0, NAV_CATALOG, 1, getString(R.string.nav_catalog))
+                .setIcon(android.R.drawable.ic_menu_search)
+            menu.add(0, NAV_FAVORITES, 2, getString(R.string.nav_favorites))
+                .setIcon(android.R.drawable.btn_star_big_off)
+            menu.add(0, NAV_CART, 3, getString(R.string.nav_cart))
+                .setIcon(android.R.drawable.ic_menu_agenda)
+            menu.add(0, NAV_PROFILE, 4, getString(R.string.nav_profile))
+                .setIcon(android.R.drawable.ic_menu_myplaces)
+            setOnItemSelectedListener { item ->
+                val tab = when (item.itemId) {
+                    NAV_HOME -> "Главная"
+                    NAV_CATALOG -> "Каталог"
+                    NAV_FAVORITES -> "Избранное"
+                    NAV_CART -> "Корзина"
+                    else -> "Профиль"
+                }
+                navigate(tab)
+                true
             }
-            item.addView(text(symbol, 19, textSecondary, true).apply { gravity = Gravity.CENTER })
-            val caption = if (tab == "Корзина") "Корзина " + cart.size else tab
-            item.addView(text(caption, 9, textSecondary, true).apply {
-                gravity = Gravity.CENTER
-                maxLines = 1
-            })
-            nav.addView(item, LinearLayout.LayoutParams(0, dp(52), 1f))
-            map[tab] = item
         }
-        navItems = map
-        root.addView(nav, LinearLayout.LayoutParams(-1, dp(62)))
+        root.addView(bottomNavigation, LinearLayout.LayoutParams(-1, dp(66)))
         setContentView(root)
         ViewCompat.requestApplyInsets(root)
         refreshHeaderAndNav()
@@ -489,11 +481,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun navigate(tab: String) {
         currentTab = tab
+        if (::bottomNavigation.isInitialized) {
+            val itemId = when (tab) {
+                "Главная" -> NAV_HOME
+                "Каталог" -> NAV_CATALOG
+                "Избранное" -> NAV_FAVORITES
+                "Корзина" -> NAV_CART
+                else -> NAV_PROFILE
+            }
+            bottomNavigation.menu.findItem(itemId)?.isChecked = true
+        }
         when (tab) {
             "Главная" -> showHome()
             "Каталог" -> showCatalog()
             "Избранное" -> showFavorites()
             "Корзина" -> showCart()
+            "Админ" -> showAdmin()
             else -> showProfile()
         }
     }
@@ -518,16 +521,16 @@ class MainActivity : AppCompatActivity() {
         val header = root.getChildAt(0) as? LinearLayout ?: return
         val cartButton = header.getChildAt(1) as? TextView
         cartButton?.text = "▣  " + cart.size
-        if (::navItems.isInitialized) {
-            navItems.forEach { (tab, item) ->
-                val active = currentTab == tab
-                item.background = rounded(if (active) accentDark else Color.TRANSPARENT, 12)
-                (item.getChildAt(0) as TextView).setTextColor(if (active) accent else textSecondary)
-                (item.getChildAt(1) as TextView).apply {
-                    text = if (tab == "Корзина") "Корзина " + cart.size else tab
-                    setTextColor(if (active) textPrimary else textSecondary)
+        if (::bottomNavigation.isInitialized) {
+            bottomNavigation.menu.findItem(
+                when (currentTab) {
+                    "Каталог" -> NAV_CATALOG
+                    "Избранное" -> NAV_FAVORITES
+                    "Корзина" -> NAV_CART
+                    "Профиль", "Админ" -> NAV_PROFILE
+                    else -> NAV_HOME
                 }
-            }
+            )?.isChecked = true
         }
     }
 
@@ -707,9 +710,26 @@ class MainActivity : AppCompatActivity() {
             results.addView(text("Найдено: " + filtered.size, 11, textSecondary))
             results.addView(vSpace(9))
             if (filtered.isEmpty()) {
-                results.addView(emptyState("Ничего не найдено", "Измени запрос или выбери другую категорию."))
+                results.addView(emptyState("Ничего не найдено", getString(R.string.empty_search)))
             } else {
-                filtered.forEach { addCourseCard(it, results) }
+                val recycler = RecyclerView(this).apply {
+                    layoutManager = LinearLayoutManager(this@MainActivity)
+                    isNestedScrollingEnabled = false
+                    overScrollMode = View.OVER_SCROLL_NEVER
+                    itemAnimator = null
+                    adapter = CourseAdapter(
+                        onFavorite = { toggleFavorite(it) },
+                        onCart = { course ->
+                            when {
+                                purchased.contains(course.id) -> showCourseLearning(course)
+                                cart.contains(course.id) -> navigate("Корзина")
+                                else -> addToCart(course)
+                            }
+                        },
+                        onDetails = { showDetails(it) }
+                    ).also { it.submitItems(filtered, favorites, cart, purchased) }
+                }
+                results.addView(recycler, LinearLayout.LayoutParams(-1, -2))
             }
         }
 
