@@ -293,6 +293,35 @@ class CourseMarketRepository(context: Context) {
             result
         }
 
+    suspend fun getLessonContent(courseId: Int, lessonIndex: Int): CourseLessonContent? =
+        withContext(Dispatchers.IO) {
+            database.readableDatabase.rawQuery(
+                """
+                SELECT title, introduction, key_points_json, example, practice,
+                       question, answers_json, correct_answer, explanation
+                FROM lessons WHERE course_id = ? AND lesson_index = ? LIMIT 1
+                """.trimIndent(),
+                arrayOf(courseId.toString(), lessonIndex.toString())
+            ).use { cursor ->
+                if (!cursor.moveToFirst()) return@withContext null
+                fun readArray(value: String): List<String> =
+                    (0 until org.json.JSONArray(value).length()).map { index ->
+                        org.json.JSONArray(value).optString(index)
+                    }
+                CourseLessonContent(
+                    title = cursor.getString(0),
+                    introduction = cursor.getString(1),
+                    keyPoints = readArray(cursor.getString(2)),
+                    example = cursor.getString(3),
+                    practice = cursor.getString(4),
+                    question = cursor.getString(5),
+                    answers = readArray(cursor.getString(6)),
+                    correctAnswer = cursor.getInt(7),
+                    explanation = cursor.getString(8)
+                )
+            }
+        }
+
     suspend fun completeLesson(userId: Long, courseId: Int, lessonIndex: Int) =
         withContext(Dispatchers.IO) {
             val db = database.writableDatabase
@@ -516,6 +545,8 @@ class CourseMarketRepository(context: Context) {
             )
         }
     }
+
+    fun close() = database.close()
 
     companion object {
         private fun JSONArray.toStringList(): List<String> =
