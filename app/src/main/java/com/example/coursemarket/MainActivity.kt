@@ -607,7 +607,8 @@ class MainActivity : AppCompatActivity() {
         contentBox.addView(quickStats, matchWrap())
 
         sectionTitle(getString(R.string.home_featured), getString(R.string.home_featured_caption))
-        listOf(3, 1, 2).forEach { id -> courses.first { it.id == id }.let { addCourseCard(it) } }
+        val featuredCourses = listOf(3, 1, 2).mapNotNull { id -> courses.firstOrNull { it.id == id } }
+        contentBox.addView(courseRecyclerView(featuredCourses), matchWrap())
 
         sectionTitle(getString(R.string.home_categories), getString(R.string.home_categories_caption))
         listOf(
@@ -738,24 +739,10 @@ class MainActivity : AppCompatActivity() {
             if (filtered.isEmpty()) {
                 results.addView(emptyState("Ничего не найдено", getString(R.string.empty_search)))
             } else {
-                val recycler = RecyclerView(this).apply {
-                    layoutManager = LinearLayoutManager(this@MainActivity)
-                    isNestedScrollingEnabled = false
-                    overScrollMode = View.OVER_SCROLL_NEVER
-                    itemAnimator = null
-                    adapter = CourseAdapter(
-                        onFavorite = { toggleFavorite(it) },
-                        onCart = { course ->
-                            when {
-                                purchased.contains(course.id) -> showCourseLearning(course)
-                                cart.contains(course.id) -> navigate("Корзина")
-                                else -> addToCart(course)
-                            }
-                        },
-                        onDetails = { showDetails(it) }
-                    ).also { it.submitItems(filtered, favorites, cart, purchased) }
-                }
-                results.addView(recycler, LinearLayout.LayoutParams(-1, -2))
+                results.addView(
+                    courseRecyclerView(filtered),
+                    LinearLayout.LayoutParams(-1, -2)
+                )
             }
         }
 
@@ -770,6 +757,25 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun courseRecyclerView(items: List<Course>): RecyclerView =
+        RecyclerView(this).apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            isNestedScrollingEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+            itemAnimator = null
+            adapter = CourseAdapter(
+                onFavorite = { toggleFavorite(it) },
+                onCart = { course ->
+                    when {
+                        purchased.contains(course.id) -> showCourseLearning(course)
+                        cart.contains(course.id) -> navigate("Корзина")
+                        else -> addToCart(course)
+                    }
+                },
+                onDetails = { showDetails(it) }
+            ).also { it.submitItems(items, favorites, cart, purchased) }
+        }
+
     private fun showFavorites() {
         currentTab = "Избранное"
         render(getString(R.string.favorites_title), getString(R.string.favorites_subtitle))
@@ -781,7 +787,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             contentBox.addView(text(list.size.toString() + " сохранено", 12, textSecondary))
             contentBox.addView(vSpace(10))
-            list.forEach { addCourseCard(it) }
+            contentBox.addView(courseRecyclerView(list), matchWrap())
         }
     }
 
