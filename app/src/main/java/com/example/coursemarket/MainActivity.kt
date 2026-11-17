@@ -9,7 +9,6 @@ import android.text.InputType
 import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
-import android.view.Window
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.HorizontalScrollView
@@ -335,7 +334,7 @@ class MainActivity : AppCompatActivity() {
         }
         quickStats.addView(quickInfo("12", "курсов"), weighted(1f))
         quickStats.addView(quickInfo("3", "направления"), weighted(1f))
-        quickStats.addView(quickInfo("100%", "доступно офлайн"), weighted(1f))
+        quickStats.addView(quickInfo("Офлайн", "каталог локально"), weighted(1f))
         contentBox.addView(quickStats, matchWrap())
 
         sectionTitle("Популярное сейчас", "Выбор редакции")
@@ -628,6 +627,9 @@ class MainActivity : AppCompatActivity() {
                     gravity = Gravity.CENTER_VERTICAL
                     background = rounded(surface, 15)
                     setPadding(dp(13), dp(12), dp(13), dp(12))
+                    isClickable = true
+                    isFocusable = true
+                    setOnClickListener { showDetails(course) }
                 }
                 val icon = TextView(this).apply {
                     text = course.icon
