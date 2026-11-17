@@ -1,19 +1,23 @@
 # CourseMarket
 
-CourseMarket is a Kotlin + Android Views demonstration marketplace for educational courses.
+CourseMarket is a Kotlin + Android Views learning marketplace prototype. It combines a course catalog, a local checkout demonstration and an offline learning area.
 
 ## Product features
 
-- Home page with featured programs, learning directions and product highlights.
+- Home page with featured programs, category shortcuts and a resume-learning card.
 - Catalog of 12 populated courses across Development, Design and Game Design.
-- Search by course title, instructor, category and description.
+- Search by title, instructor, category and description.
 - Category filters and sorting by rating or price.
-- Course detail view with description, instructor, level, duration, lesson count, curriculum and learning outcomes.
-- Favorites with local persistence.
-- Shopping cart with item removal and automatic total calculation.
-- Demonstration checkout and a purchased-courses section in the profile.
-- Responsive dark interface with consistent typography, spacing and bottom navigation.
-- Favorites, cart and purchased course IDs are stored locally with SharedPreferences.
+- Course details with instructor, level, duration, curriculum and learning outcomes.
+- **61 authored lesson materials** across all 12 courses.
+- Each lesson includes an explanation, key ideas, a worked example, a practical assignment and a multiple-choice knowledge check.
+- Lessons can be completed in sequence; per-course progress is saved locally and can be resumed.
+- Purchased courses open the learning area rather than only showing a purchase label.
+- Favorites and shopping cart with local persistence.
+- Checkout form with buyer name and email validation.
+- Three demonstration payment choices: bank card, SBP and invoice.
+- A local order number and receipt summary are stored in order history.
+- Profile with purchased courses, lesson progress and the latest demonstration order.
 
 ## Technology
 
@@ -21,7 +25,8 @@ CourseMarket is a Kotlin + Android Views demonstration marketplace for education
 - Android Views (programmatic UI)
 - AndroidX AppCompat and Core
 - Material Components
-- SharedPreferences
+- SharedPreferences for local state
+- Android JSON classes for local order history
 
 ## Run
 
@@ -31,6 +36,10 @@ CourseMarket is a Kotlin + Android Views demonstration marketplace for education
 4. Select the `app` run configuration and an emulator or connected Android device.
 5. Run the application.
 
-## Demo limitations
+## Important demo limitations
 
-Course information is bundled in the application. The cart and purchases are stored locally on the device. Checkout demonstrates the purchase flow only: there is no real payment provider, remote backend, cloud synchronization or user authentication.
+This is a self-contained local prototype. Course materials are bundled in the application; favorites, cart, purchases, order history and lesson progress are stored on the current device.
+
+The checkout is deliberately a **demonstration flow**. It validates buyer name and email, lets the user choose a payment presentation, creates a local order number and receipt, and unlocks the courses. It does not contact a bank, generate a real SBP payment, issue a payable invoice or charge money. Do not enter or store real card numbers, CVC codes or banking passwords. A production payment flow requires a secure backend and an approved payment provider.
+
+There is no remote account, cloud synchronization, hosted video platform or server-side course delivery.
