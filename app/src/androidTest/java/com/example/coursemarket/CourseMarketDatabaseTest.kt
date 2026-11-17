@@ -58,12 +58,16 @@ class CourseMarketDatabaseTest {
         assertTrue(repository.favoriteCourseIds(account.id).isEmpty())
         assertTrue(sample.id in repository.cartCourseIds(account.id))
 
+        repository.setCartQuantity(account.id, sample.id, 3)
+        assertEquals(3, repository.cartQuantities(account.id)[sample.id])
+
         val orderNumber = repository.createDemoOrder(
             account.id,
             "Тестовый Покупатель",
             "test@example.com",
             "СБП (демо)",
-            listOf(sample)
+            listOf(sample),
+            mapOf(sample.id to 3)
         )
         assertTrue(orderNumber.startsWith("CM-"))
         assertTrue(sample.id in repository.purchasedCourseIds(account.id))
@@ -75,6 +79,8 @@ class CourseMarketDatabaseTest {
         val order = repository.ordersForUser(account.id).single()
         assertEquals(orderNumber, order.number)
         assertEquals("CREATED_DEMO", order.status)
+        assertEquals(sample.price * 3, order.total)
+        assertEquals(3, order.itemCount)
         repository.updateOrderStatus(order.id, "CANCELLED")
         assertTrue(repository.purchasedCourseIds(account.id).isEmpty())
     }
