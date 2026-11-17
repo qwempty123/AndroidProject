@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
 import android.util.Patterns
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -665,7 +666,7 @@ class MainActivity : AppCompatActivity() {
             hint = "Поиск по курсу, автору или теме"
             setHintTextColor(textSecondary)
             setTextColor(textPrimary)
-            textSize = 14f
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(14))
             includeFontPadding = false
             setSingleLine(true)
             inputType = InputType.TYPE_CLASS_TEXT
@@ -806,7 +807,7 @@ class MainActivity : AppCompatActivity() {
             }
             val colorTile = TextView(this).apply {
                 text = course.icon
-                textSize = 20f
+                setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(20))
                 includeFontPadding = false
                 gravity = Gravity.CENTER
                 setTextColor(textPrimary)
@@ -962,7 +963,7 @@ class MainActivity : AppCompatActivity() {
             hint = hintText
             setHintTextColor(textSecondary)
             setTextColor(textPrimary)
-            textSize = 14f
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(14))
             includeFontPadding = false
             setSingleLine(true)
             inputType = input
@@ -1148,7 +1149,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 val icon = TextView(this).apply {
                     text = course.icon
-                    textSize = 19f
+                    setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(19))
                     includeFontPadding = false
                     gravity = Gravity.CENTER
                     setTextColor(textPrimary)
@@ -1372,7 +1373,7 @@ class MainActivity : AppCompatActivity() {
             hint = getString(R.string.course_description_hint)
             setHintTextColor(textSecondary)
             setTextColor(textPrimary)
-            textSize = 13f
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(13))
             minLines = 3
             maxLines = 5
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
@@ -1463,7 +1464,7 @@ class MainActivity : AppCompatActivity() {
             hint = getString(R.string.course_description_hint)
             setHintTextColor(textSecondary)
             setTextColor(textPrimary)
-            textSize = 13f
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(13))
             minLines = 3
             maxLines = 5
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
@@ -1972,7 +1973,7 @@ class MainActivity : AppCompatActivity() {
         sectionTitle(getString(R.string.lesson_example_title))
         val example = TextView(this).apply {
             text = lesson.example
-            textSize = 12f
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(12))
             typeface = Typeface.MONOSPACE
             setTextColor(Color.rgb(220, 213, 244))
             includeFontPadding = false
@@ -2170,7 +2171,7 @@ class MainActivity : AppCompatActivity() {
     private fun text(value: String, size: Int, color: Int, bold: Boolean = false): TextView =
         TextView(this).apply {
             text = value
-            textSize = size.toFloat()
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(size))
             setTextColor(color)
             includeFontPadding = false
             gravity = Gravity.CENTER_VERTICAL
@@ -2213,8 +2214,22 @@ class MainActivity : AppCompatActivity() {
         else -> "курсов"
     }
 
-    private fun dp(value: Int): Int =
-        (value * resources.displayMetrics.density).toInt()
+    private val dimensionIds = mutableMapOf<String, Int>()
+
+    private fun dimensionId(name: String): Int =
+        dimensionIds.getOrPut(name) { resources.getIdentifier(name, "dimen", packageName) }
+
+    private fun dp(value: Int): Int {
+        val resourceId = dimensionId("dp_" + value)
+        return if (resourceId != 0) resources.getDimensionPixelSize(resourceId)
+        else (value * resources.displayMetrics.density).toInt()
+    }
+
+    private fun fontSizePx(value: Int): Float {
+        val resourceId = dimensionId("font_" + value)
+        return if (resourceId != 0) resources.getDimension(resourceId)
+        else value * resources.displayMetrics.scaledDensity
+    }
 
     private companion object {
         const val NAV_HOME = 101
