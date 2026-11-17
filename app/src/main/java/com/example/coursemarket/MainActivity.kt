@@ -1205,7 +1205,334 @@ class MainActivity : AppCompatActivity() {
         else -> "Создан (демо)"
     }
 
-        private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
+        private fun showAdmin() {
+        if (currentUser?.isAdmin != true) {
+            Toast.makeText(this, getString(R.string.admin_only), Toast.LENGTH_SHORT).show()
+            showProfile()
+            return
+        }
+        currentTab = "Админ"
+        render(getString(R.string.admin_panel), "Управление каталогом, пользователями и заказами.")
+        contentBox.addView(button("← В профиль", false) { showProfile() }, matchWrap())
+        contentBox.addView(vSpace(12))
+
+        val overview = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = rounded(surfaceAlt, 15)
+            setPadding(dp(14), dp(13), dp(14), dp(13))
+        }
+        overview.addView(statCard("Курсов", courses.size.toString()), LinearLayout.LayoutParams(0, dp(78), 1f))
+        overview.addView(hSpace(7))
+        overview.addView(statCard("Заказов", "…"), LinearLayout.LayoutParams(0, dp(78), 1f))
+        overview.addView(hSpace(7))
+        overview.addView(statCard("Пользователей", "…"), LinearLayout.LayoutParams(0, dp(78), 1f))
+        contentBox.addView(overview, matchWrap())
+        uiScope.launch {
+            try {
+                val orders = repository.allOrders()
+                val users = repository.userCount()
+                (overview.getChildAt(2) as? LinearLayout)?.let {
+                    it.removeAllViews()
+                    it.addView(statCard("Заказов", orders.size.toString()))
+                }
+                (overview.getChildAt(4) as? LinearLayout)?.let {
+                    it.removeAllViews()
+                    it.addView(statCard("Пользователей", users.toString()))
+                }
+            } catch (_: Exception) { }
+        }
+
+        sectionTitle(getString(R.string.admin_courses), "Создание, редактирование и удаление записей SQLite")
+        contentBox.addView(button("＋  " + getString(R.string.admin_add_course), true) {
+            showCreateCourseDialog()
+        }, matchWrap())
+        contentBox.addView(vSpace(10))
+
+        courses.forEach { course ->
+            val card = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                background = rounded(surface, 14)
+                setPadding(dp(13), dp(12), dp(13), dp(12))
+            }
+            card.addView(text(course.title, 14, textPrimary, true))
+            card.addView(vSpace(4))
+            card.addView(text(
+                course.category + "  •  " + course.author + "  •  " + money(course.price),
+                10, textSecondary
+            ))
+            card.addView(vSpace(9))
+            val actions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+            actions.addView(button("Изменить", false, compact = true) {
+                showEditCourseDialog(course)
+            }, LinearLayout.LayoutParams(0, dp(40), 1f))
+            actions.addView(hSpace(7))
+            actions.addView(button("Удалить", false, compact = true) {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Удалить курс?")
+                    .setMessage(
+                        "Курс «" + course.title + "» будет удалён из каталога. " +
+                            "Если на него уже оформлялись заказы, удаление заблокирует ограничение внешнего ключа."
+                    )
+                    .setNegativeButton("Отмена", null)
+                    .setPositiveButton("Удалить") { _, _ ->
+                        uiScope.launch {
+                            val deleted = repository.deleteCourse(course.id)
+                            if (deleted) {
+                                favorites.remove(course.id)
+                                cart.remove(course.id)
+                                purchased.remove(course.id)
+                                completedLessons.remove(course.id)
+                                courses = repository.getCourses()
+                                saveState()
+                                showAdmin()
+                            } else {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Нельзя удалить курс: он присутствует в истории заказов.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+                    .show()
+            }, LinearLayout.LayoutParams(0, dp(40), 1f))
+            card.addView(actions)
+            contentBox.addView(card, matchWrap())
+            contentBox.addView(vSpace(8))
+        }
+
+        sectionTitle(getString(R.string.admin_orders), "Изменяй статусы для демонстрации административного сценария")
+        val ordersContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        contentBox.addView(ordersContainer, matchWrap())
+        loadAdminOrders(ordersContainer)
+        contentBox.addView(vSpace(16))
+        contentBox.addView(text(
+            "Администрирование работает локально на этом устройстве. Роли и данные хранятся в SQLite.",
+            10, textSecondary
+        ))
+    }
+
+    private fun showCreateCourseDialog() {
+        val form = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(8), dp(18), dp(4))
+        }
+        val title = checkoutInput(getString(R.string.course_title_hint), InputType.TYPE_CLASS_TEXT, "")
+        val author = checkoutInput(getString(R.string.course_author_hint), InputType.TYPE_CLASS_TEXT, "")
+        val description = EditText(this).apply {
+            hint = getString(R.string.course_description_hint)
+            setHintTextColor(textSecondary)
+            setTextColor(textPrimary)
+            textSize = 13f
+            minLines = 3
+            maxLines = 5
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            setPadding(dp(13), dp(10), dp(13), dp(10))
+            background = rounded(surface, 12)
+        }
+        val price = checkoutInput(getString(R.string.course_price_hint), InputType.TYPE_CLASS_NUMBER, "1990")
+        val categorySpinner = Spinner(this).apply {
+            adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                listOf("Разработка", "Дизайн", "Геймдизайн")
+            )
+            background = rounded(surface, 12)
+        }
+        listOf<View>(title, author, description, price, categorySpinner).forEachIndexed { index, view ->
+            if (index > 0) form.addView(vSpace(8))
+            form.addView(view, matchWrap())
+        }
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.admin_add_course))
+            .setView(form)
+            .setNegativeButton("Отмена", null)
+            .setPositiveButton("Создать", null)
+            .create()
+            .also { dialog ->
+                dialog.setOnShowListener {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        val name = title.text.toString().trim()
+                        val teacher = author.text.toString().trim()
+                        val summary = description.text.toString().trim()
+                        val cost = price.text.toString().toIntOrNull()
+                        if (name.isBlank() || teacher.isBlank() || summary.isBlank() || cost == null || cost < 0) {
+                            Toast.makeText(this, "Заполни все поля и укажи корректную цену.", Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        val modules = listOf(
+                            "Введение и основные понятия",
+                            "Базовые инструменты и рабочая среда",
+                            "Практика на небольшом примере",
+                            "Самостоятельная работа и проверка",
+                            "Итоговый проект и следующие шаги"
+                        )
+                        val newCourse = Course(
+                            id = 0,
+                            title = name,
+                            category = categorySpinner.selectedItem.toString(),
+                            author = teacher,
+                            description = summary,
+                            price = cost,
+                            rating = "5.0",
+                            duration = "5 часов",
+                            level = "Начальный",
+                            icon = "＋",
+                            tint = "#514B83",
+                            lessons = modules.size,
+                            modules = modules,
+                            outcomes = listOf("Понимать основные принципы темы", "Применять знания на практике")
+                        )
+                        uiScope.launch {
+                            try {
+                                repository.addCourse(newCourse)
+                                courses = repository.getCourses()
+                                dialog.dismiss()
+                                showAdmin()
+                            } catch (error: Exception) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Не удалось добавить курс: " + (error.message ?: ""),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+                }
+                dialog.show()
+            }
+    }
+
+    private fun showEditCourseDialog(course: Course) {
+        val form = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(18), dp(8), dp(18), dp(4))
+        }
+        val title = checkoutInput(getString(R.string.course_title_hint), InputType.TYPE_CLASS_TEXT, course.title)
+        val author = checkoutInput(getString(R.string.course_author_hint), InputType.TYPE_CLASS_TEXT, course.author)
+        val description = EditText(this).apply {
+            hint = getString(R.string.course_description_hint)
+            setHintTextColor(textSecondary)
+            setTextColor(textPrimary)
+            textSize = 13f
+            minLines = 3
+            maxLines = 5
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            setPadding(dp(13), dp(10), dp(13), dp(10))
+            background = rounded(surface, 12)
+            setText(course.description)
+        }
+        val price = checkoutInput(
+            getString(R.string.course_price_hint),
+            InputType.TYPE_CLASS_NUMBER,
+            course.price.toString()
+        )
+        listOf<View>(title, author, description, price).forEachIndexed { index, view ->
+            if (index > 0) form.addView(vSpace(8))
+            form.addView(view, matchWrap())
+        }
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.admin_edit_course))
+            .setView(form)
+            .setNegativeButton("Отмена", null)
+            .setPositiveButton("Сохранить", null)
+            .create()
+            .also { dialog ->
+                dialog.setOnShowListener {
+                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                        val priceValue = price.text.toString().toIntOrNull()
+                        if (title.text.isNullOrBlank() || author.text.isNullOrBlank() ||
+                            description.text.isNullOrBlank() || priceValue == null || priceValue < 0
+                        ) {
+                            Toast.makeText(this, "Проверь поля формы.", Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+                        uiScope.launch {
+                            try {
+                                repository.updateCourse(
+                                    course.id,
+                                    title.text.toString(),
+                                    author.text.toString(),
+                                    description.text.toString(),
+                                    priceValue
+                                )
+                                courses = repository.getCourses()
+                                dialog.dismiss()
+                                showAdmin()
+                            } catch (error: Exception) {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Не удалось обновить курс: " + (error.message ?: ""),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+                }
+                dialog.show()
+            }
+    }
+
+    private fun loadAdminOrders(container: LinearLayout) {
+        uiScope.launch {
+            try {
+                val orders = repository.allOrders()
+                container.removeAllViews()
+                if (orders.isEmpty()) {
+                    container.addView(text("Заказов пока нет.", 11, textSecondary))
+                    return@launch
+                }
+                orders.forEach { order ->
+                    val row = LinearLayout(this@MainActivity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        background = rounded(surface, 14)
+                        setPadding(dp(13), dp(12), dp(13), dp(12))
+                        isClickable = true
+                        isFocusable = true
+                        setOnClickListener { showOrderStatusDialog(order) }
+                    }
+                    row.addView(text(order.number + "  •  " + money(order.total), 13, textPrimary, true))
+                    row.addView(vSpace(4))
+                    row.addView(text(
+                        order.customerName + " / @" + order.username + " / " + order.email,
+                        10, textSecondary
+                    ))
+                    row.addView(vSpace(4))
+                    row.addView(text(
+                        orderStatusLabel(order.status) + "  •  " + order.paymentMethod,
+                        10, if (order.status == "CANCELLED" || order.status == "REJECTED") gold else success
+                    ))
+                    container.addView(row, matchWrap())
+                    container.addView(vSpace(7))
+                }
+            } catch (_: Exception) {
+                container.addView(text("Не удалось загрузить заказы.", 11, gold))
+            }
+        }
+    }
+
+    private fun showOrderStatusDialog(order: AdminOrder) {
+        val options = arrayOf("Подтвердить (демо)", "Отменить", "Отклонить")
+        val statuses = arrayOf("CONFIRMED_DEMO", "CANCELLED", "REJECTED")
+        AlertDialog.Builder(this)
+            .setTitle("Статус заказа " + order.number)
+            .setSingleChoiceItems(options, -1) { dialog, which ->
+                uiScope.launch {
+                    try {
+                        repository.updateOrderStatus(order.id, statuses[which])
+                        dialog.dismiss()
+                        showAdmin()
+                    } catch (error: Exception) {
+                        Toast.makeText(this@MainActivity, error.message ?: "Ошибка", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Закрыть", null)
+            .show()
+    }
+
+    private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 18)
