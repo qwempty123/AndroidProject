@@ -23,6 +23,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentContainerView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -160,6 +161,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var root: LinearLayout
     private lateinit var contentBox: LinearLayout
     private lateinit var bottomNavigation: BottomNavigationView
+    private var screenContainerId: Int = View.NO_ID
     private val repository by lazy { CourseMarketRepository(applicationContext) }
     private val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var currentUser: UserAccount? = null
@@ -433,19 +435,12 @@ class MainActivity : AppCompatActivity() {
         val divider = View(this).apply { setBackgroundColor(Color.rgb(49, 47, 62)) }
         root.addView(divider, LinearLayout.LayoutParams(-1, dp(1)))
 
-        val scroll = ScrollView(this).apply {
-            isFillViewport = true
-            clipToPadding = false
-            overScrollMode = View.OVER_SCROLL_NEVER
-            setPadding(0, dp(10), 0, dp(14))
+        screenContainerId = View.generateViewId()
+        val screenContainer = FragmentContainerView(this).apply {
+            id = screenContainerId
+            setBackgroundColor(bg)
         }
-        contentBox = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            clipChildren = false
-            clipToPadding = false
-        }
-        scroll.addView(contentBox)
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        root.addView(screenContainer, LinearLayout.LayoutParams(-1, 0, 1f))
 
         bottomNavigation = BottomNavigationView(this).apply {
             background = rounded(surface, 18)
@@ -502,6 +497,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render(title: String, subtitle: String? = null) {
+        if (screenContainerId == View.NO_ID) return
+        supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .replace(screenContainerId, CourseScreenFragment())
+            .commitNow()
+        val screenFragment = supportFragmentManager.findFragmentById(screenContainerId) as CourseScreenFragment
+        contentBox = screenFragment.contentContainer
         contentBox.removeAllViews()
         val heading = text(title, 27, textPrimary, true)
         heading.setPadding(0, dp(8), 0, dp(3))
