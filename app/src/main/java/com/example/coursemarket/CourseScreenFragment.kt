@@ -31,10 +31,10 @@ class CourseScreenFragment : Fragment() {
             clipToPadding = false
             overScrollMode = View.OVER_SCROLL_NEVER
             setPadding(
-                (18 * resources.displayMetrics.density).toInt(),
-                (10 * resources.displayMetrics.density).toInt(),
-                (18 * resources.displayMetrics.density).toInt(),
-                (14 * resources.displayMetrics.density).toInt()
+                resources.getDimensionPixelSize(R.dimen.dp_18),
+                resources.getDimensionPixelSize(R.dimen.dp_10),
+                resources.getDimensionPixelSize(R.dimen.dp_18),
+                resources.getDimensionPixelSize(R.dimen.dp_14)
             )
         }
         contentContainer = LinearLayout(context).apply {
