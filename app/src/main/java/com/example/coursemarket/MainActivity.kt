@@ -63,84 +63,84 @@ class MainActivity : AppCompatActivity() {
         Course(
             1, "Kotlin: от основ до Android-приложения", "Разработка", "Алексей Морозов",
             "Последовательно изучи Kotlin и собери Android-приложение с интерфейсом, навигацией и локальным хранением данных. В конце курса у тебя будет законченный учебный проект.",
-            2490, "4.9", "18 часов", "Начальный", "K", "#55427D", 24,
+            2490, "4.9", "18 часов", "Начальный", "K", "#55427D", 5,
             listOf("Знакомство с Kotlin и настройка среды", "Переменные, типы, условия и циклы", "Функции, классы, коллекции и null safety", "Android Views, события и навигация", "Хранение данных и финальный проект"),
             listOf("Писать читаемый код на Kotlin", "Создавать экраны Android-приложения", "Сохранять данные локально и собирать APK")
         ),
         Course(
             2, "UI/UX дизайн: интерфейсы с нуля", "Дизайн", "Мария Волкова",
             "Научись превращать задачу пользователя в понятный интерфейс. Разберёшься с исследованиями, пользовательскими сценариями, сетками, типографикой и визуальной иерархией.",
-            1990, "4.8", "12 часов", "Начальный", "✦", "#754B69", 18,
+            1990, "4.8", "12 часов", "Начальный", "✦", "#754B69", 5,
             listOf("Основы UX и анализ аудитории", "Пользовательские сценарии и wireframes", "Сетка, композиция, цвет и типографика", "UI-компоненты и дизайн-система", "Прототипирование и проверка решения"),
             listOf("Проектировать понятные пользовательские потоки", "Создавать цельные интерфейсы", "Обосновывать визуальные решения")
         ),
         Course(
             3, "Unity: разработка 2D-игр на C#", "Разработка", "Игорь Лебедев",
             "Создай основу собственной 2D-игры: контроллер персонажа, физику, боевую систему, анимации, врагов и игровые сцены. Практика построена вокруг небольшого игрового проекта.",
-            3290, "5.0", "26 часов", "Начальный", "◈", "#365F70", 32,
+            3290, "5.0", "26 часов", "Начальный", "◈", "#365F70", 6,
             listOf("Структура проекта и основы Unity", "C#, компоненты и жизненный цикл", "Rigidbody2D, коллизии и контроллер игрока", "Анимации, атаки и система здоровья", "AI противников и организация уровней", "Сборка и полировка игрового прототипа"),
             listOf("Создавать управляемого 2D-персонажа", "Настраивать анимации и боевые столкновения", "Собирать игровой прототип от начала до конца")
         ),
         Course(
             4, "Python для практических задач", "Разработка", "Денис Ким",
             "Освой Python на примерах реальных задач: обработка файлов, автоматизация повторяющихся действий, работа с данными и внешними API.",
-            1790, "4.7", "15 часов", "Начальный", "Py", "#42664F", 20,
+            1790, "4.7", "15 часов", "Начальный", "Py", "#42664F", 5,
             listOf("Синтаксис, переменные и базовые типы", "Условия, циклы и функции", "Списки, словари и работа с файлами", "Исключения и структура проекта", "HTTP-запросы и небольшой автоматизатор"),
             listOf("Писать скрипты для повседневных задач", "Обрабатывать файлы и коллекции данных", "Получать данные из простых API")
         ),
         Course(
             5, "Blender: 3D-моделирование", "Дизайн", "Елена Орлова",
             "Пройди путь от простых форм до законченной стилизованной сцены. Изучишь моделирование, материалы, свет, композицию и финальный рендер.",
-            2890, "4.9", "21 час", "Средний", "⬡", "#755A3A", 22,
+            2890, "4.9", "21 час", "Средний", "⬡", "#755A3A", 5,
             listOf("Навигация и рабочее пространство Blender", "Базовое и hard-surface моделирование", "Модификаторы и чистая геометрия", "Материалы, текстуры и освещение", "Композиция, камера и финальный рендер"),
             listOf("Моделировать простые игровые ассеты", "Настраивать материалы и освещение", "Подготавливать сцену к финальному рендеру")
         ),
         Course(
             6, "Геймдизайн: от идеи до прототипа", "Геймдизайн", "Павел Соколов",
             "Разберись, почему игровые механики работают. Сформируй core loop, опиши правила, спроектируй уровни и проверь идею на простом прототипе.",
-            2190, "4.8", "14 часов", "Любой", "⚔", "#70464F", 16,
+            2190, "4.8", "14 часов", "Любой", "⚔", "#70464F", 5,
             listOf("Роль геймдизайнера и анализ референсов", "Core loop, механики и игровые системы", "Баланс, прогрессия и обратная связь", "Дизайн уровней и кривая сложности", "Документация и проверка прототипа"),
             listOf("Формулировать игровую концепцию", "Описывать механики и игровой цикл", "Собирать понятный дизайн-документ")
         ),
         Course(
             7, "Figma: профессиональный workflow", "Дизайн", "Анна Белова",
             "Освой Figma для повседневной продуктовой работы: компоненты, варианты, Auto Layout, переменные, интерактивные прототипы и подготовка макетов к передаче.",
-            1490, "4.8", "9 часов", "Начальный", "F", "#514B83", 14,
+            1490, "4.8", "9 часов", "Начальный", "F", "#514B83", 5,
             listOf("Рабочее пространство и организация файлов", "Auto Layout и адаптивные компоненты", "Variants, variables и библиотеки", "Интерактивные прототипы", "Подготовка макетов к handoff"),
             listOf("Создавать переиспользуемые компоненты", "Быстро собирать адаптивные экраны", "Передавать макеты разработчикам")
         ),
         Course(
             8, "C# для разработчиков игр", "Разработка", "Максим Романов",
             "Изучи фундамент C# с акцентом на игровые проекты: типы, ООП, коллекции, события, интерфейсы и асинхронность. Примеры ориентированы на Unity.",
-            2290, "4.9", "17 часов", "Начальный", "C#", "#3E5B79", 21,
+            2290, "4.9", "17 часов", "Начальный", "C#", "#3E5B79", 5,
             listOf("Синтаксис, типы и управление потоком", "Методы, классы и объектная модель", "Наследование, интерфейсы и композиция", "Коллекции, LINQ и события", "Практика: архитектура игровой системы"),
             listOf("Понимать базовые принципы ООП", "Разделять ответственность классов", "Использовать события и коллекции в проекте")
         ),
         Course(
             9, "Веб-разработка: HTML, CSS и JavaScript", "Разработка", "Никита Орлов",
             "Собери адаптивную веб-страницу и добавь ей интерактивность. Курс охватывает семантическую разметку, стили, основы JavaScript и публикацию проекта.",
-            1890, "4.8", "20 часов", "Начальный", "</>", "#3D6470", 28,
+            1890, "4.8", "20 часов", "Начальный", "</>", "#3D6470", 5,
             listOf("HTML и семантическая структура", "CSS, Flexbox и Grid", "Адаптивная верстка и доступность", "JavaScript и обработка событий", "Финальная страница и публикация"),
             listOf("Создавать адаптивные страницы", "Добавлять интерактивность на JavaScript", "Публиковать готовый сайт")
         ),
         Course(
             10, "Motion design: анимация интерфейсов", "Дизайн", "София Миронова",
             "Научись оживлять статичный дизайн: принципы движения, тайминг, easing, микровзаимодействия и экспорт анимаций для цифровых продуктов.",
-            2390, "4.9", "16 часов", "Средний", "▶", "#76513F", 19,
+            2390, "4.9", "16 часов", "Средний", "▶", "#76513F", 5,
             listOf("Принципы анимации и визуальный ритм", "Ключевые кадры и кривые движения", "Переходы и микровзаимодействия", "Анимация интерфейсных состояний", "Экспорт и подготовка материалов"),
             listOf("Понимать тайминг и easing", "Создавать короткие UI-анимации", "Подготавливать анимации для продукта")
         ),
         Course(
             11, "Pixel Art: графика для 2D-игр", "Геймдизайн", "Артём Власов",
             "Создавай выразительную пиксельную графику для игр. Поработаешь с палитрами, силуэтами, тайлами, персонажами и простыми циклами анимации.",
-            1690, "4.9", "11 часов", "Начальный", "▦", "#536C59", 15,
+            1690, "4.9", "11 часов", "Начальный", "▦", "#536C59", 5,
             listOf("Пиксельная сетка и рабочий процесс", "Ограниченная палитра и светотень", "Силуэт и дизайн персонажа", "Тайлы и бесшовные окружения", "Idle, walk и простая атака"),
             listOf("Создавать читаемые игровые спрайты", "Работать с палитрой и силуэтом", "Рисовать простые циклы анимации")
         ),
         Course(
             12, "Product Design: проектирование продукта", "Дизайн", "Кирилл Андреев",
             "Посмотри на дизайн шире отдельных экранов: исследуй проблему, сформулируй гипотезу, спроектируй решение и оцени его по пользовательскому сценарию.",
-            2690, "4.8", "19 часов", "Средний", "◎", "#62517B", 23,
+            2690, "4.8", "19 часов", "Средний", "◎", "#62517B", 5,
             listOf("Проблема, аудитория и продуктовый контекст", "Интервью и карта пользовательского пути", "Гипотезы и приоритизация решений", "Прототип и проверка сценария", "Кейс и презентация результата"),
             listOf("Формулировать продуктовую проблему", "Проводить базовое исследование", "Собирать и презентовать дизайн-кейс")
         )
@@ -343,6 +343,26 @@ class MainActivity : AppCompatActivity() {
         hero.addView(vSpace(17))
         hero.addView(button("Открыть каталог  →", true) { navigate("Каталог") })
         contentBox.addView(hero, matchWrap())
+
+        val resumeCourse = courses.firstOrNull {
+            purchased.contains(it.id) && courseProgress(it) < 100
+        }
+        if (resumeCourse != null) {
+            contentBox.addView(vSpace(10))
+            val resumeCard = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                background = rounded(surface, 15)
+                setPadding(dp(15), dp(13), dp(15), dp(13))
+            }
+            resumeCard.addView(text("ПРОДОЛЖИТЬ ОБУЧЕНИЕ", 9, accent, true))
+            resumeCard.addView(vSpace(5))
+            resumeCard.addView(text(resumeCourse.title, 14, textPrimary, true))
+            resumeCard.addView(vSpace(9))
+            resumeCard.addView(button("Вернуться к уроку  →", true) {
+                showCourseLearning(resumeCourse)
+            })
+            contentBox.addView(resumeCard, matchWrap())
+        }
 
         val quickStats = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -780,6 +800,8 @@ class MainActivity : AppCompatActivity() {
         private fun showProfile() {
         currentTab = "Профиль"
         render("Твой профиль", "Личный кабинет CourseMarket.")
+        val buyerName = prefs.getString("buyer_name", "").orEmpty().trim()
+        val greeting = if (buyerName.isBlank()) "Добро пожаловать!" else "Добро пожаловать, " + buyerName + "!"
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = gradient("#302747", "#42365E", 19)
@@ -787,11 +809,15 @@ class MainActivity : AppCompatActivity() {
         }
         panel.addView(badge("УЧЕНИК COURSEMARKET", accentDark, accent))
         panel.addView(vSpace(12))
-        panel.addView(text("Добро пожаловать!", 22, textPrimary, true))
+        panel.addView(text(greeting, 21, textPrimary, true))
         panel.addView(vSpace(5))
-        panel.addView(text("Твой прогресс начинается с нового знания.", 12, Color.rgb(222, 216, 238)))
+        panel.addView(text("Учись в своём темпе и возвращайся к урокам в любой момент.", 12, Color.rgb(222, 216, 238)))
         contentBox.addView(panel)
-        sectionTitle("Моя статистика", "Твои действия в приложении")
+
+        sectionTitle("Моя статистика", "Твои действия и учебный прогресс")
+        val totalCompleted = completedLessons.values.sumOf { it.size }
+        contentBox.addView(text("Завершено уроков: " + totalCompleted, 11, textSecondary))
+        contentBox.addView(vSpace(8))
         val stats = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -809,14 +835,16 @@ class MainActivity : AppCompatActivity() {
         }
         contentBox.addView(stats)
 
-        sectionTitle("Мои курсы", "Доступ к оформленным покупкам")
+        sectionTitle("Мои курсы", "Нажми на программу, чтобы продолжить обучение")
         val owned = courses.filter { purchased.contains(it.id) }
         if (owned.isEmpty()) {
-            contentBox.addView(emptyState("Здесь появятся твои курсы", "Оформи демонстрационный заказ — покупки будут показаны в этом разделе."))
+            contentBox.addView(emptyState("Здесь появятся твои курсы", "Выбери программу в каталоге и оформи демонстрационный заказ."))
             contentBox.addView(vSpace(10))
             contentBox.addView(button("Выбрать курс", true) { navigate("Каталог") })
         } else {
             owned.forEach { course ->
+                val completed = progressFor(course).size
+                val percent = courseProgress(course)
                 val row = LinearLayout(this).apply {
                     orientation = LinearLayout.HORIZONTAL
                     gravity = Gravity.CENTER_VERTICAL
@@ -837,14 +865,49 @@ class MainActivity : AppCompatActivity() {
                 row.addView(icon, LinearLayout.LayoutParams(dp(44), dp(44)))
                 val labels = LinearLayout(this).apply {
                     orientation = LinearLayout.VERTICAL
-                    setPadding(dp(11), 0, 0, 0)
+                    setPadding(dp(11), 0, dp(5), 0)
                 }
                 labels.addView(text(course.title, 13, textPrimary, true).apply { maxLines = 2 })
-                labels.addView(vSpace(4))
-                labels.addView(text("Доступ открыт  •  " + course.duration, 11, success))
+                labels.addView(vSpace(5))
+                labels.addView(text(
+                    completed.toString() + " из " + course.modules.size + " уроков  •  " + percent + "%",
+                    10, if (percent == 100) success else textSecondary
+                ))
                 row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
+                row.addView(text(if (percent == 100) "✓" else "›", 21, if (percent == 100) success else accent, true))
                 contentBox.addView(row, matchWrap())
                 contentBox.addView(vSpace(8))
+            }
+        }
+
+        val orders = try {
+            JSONArray(prefs.getString("order_history", "[]").orEmpty())
+        } catch (_: Exception) {
+            JSONArray()
+        }
+        if (orders.length() > 0) {
+            val lastOrder = orders.optJSONObject(orders.length() - 1)
+            if (lastOrder != null) {
+                sectionTitle("Последний заказ", "История демонстрационного оформления")
+                val receipt = LinearLayout(this).apply {
+                    orientation = LinearLayout.VERTICAL
+                    background = rounded(surface, 15)
+                    setPadding(dp(15), dp(14), dp(15), dp(14))
+                }
+                receipt.addView(text(lastOrder.optString("id"), 14, accent, true))
+                receipt.addView(vSpace(5))
+                receipt.addView(text(
+                    lastOrder.optString("date") + "  •  " + lastOrder.optString("method"),
+                    11, textSecondary
+                ))
+                receipt.addView(vSpace(7))
+                receipt.addView(text(
+                    "Сумма: " + money(lastOrder.optInt("total")),
+                    16, textPrimary, true
+                ))
+                receipt.addView(vSpace(5))
+                receipt.addView(text("Статус: демонстрационный заказ, без списания средств.", 10, gold))
+                contentBox.addView(receipt)
             }
         }
 
@@ -857,14 +920,14 @@ class MainActivity : AppCompatActivity() {
         about.addView(text("CourseMarket", 15, textPrimary, true))
         about.addView(vSpace(5))
         about.addView(text(
-            "Демонстрационный магазин образовательных курсов. Каталог, поиск, избранное, корзина и список покупок работают локально и сохраняются на устройстве. Реальные платежи, сервер и регистрация пользователей не подключены.",
+            "12 учебных программ с уроками, примерами, практическими заданиями и проверочными вопросами. Покупки и учебный прогресс хранятся на этом устройстве. Оплата демонстрационная: сервер и платёжный провайдер не подключены.",
             12, textSecondary
         ))
         contentBox.addView(about)
         contentBox.addView(vSpace(12))
     }
 
-    private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
+        private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 18)
