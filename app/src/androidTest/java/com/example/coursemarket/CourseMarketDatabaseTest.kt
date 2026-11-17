@@ -102,6 +102,30 @@ class CourseMarketDatabaseTest {
     }
 
     @Test
+    fun demoAdminAccountAlwaysHasAdminRoleAndCanSignIn() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        context.deleteDatabase(CourseMarketDatabase.DATABASE_NAME)
+        val repository = CourseMarketRepository(context)
+
+        // Simulate an older local database where the reserved login existed
+        // with a regular-user role before admin seeding was applied.
+        repository.register(
+            CourseMarketDatabase.DEFAULT_ADMIN_USERNAME,
+            CourseMarketDatabase.DEFAULT_ADMIN_PASSWORD
+        )
+        repository.initialize(emptyList())
+
+        val admin = repository.login(
+            CourseMarketDatabase.DEFAULT_ADMIN_USERNAME,
+            CourseMarketDatabase.DEFAULT_ADMIN_PASSWORD
+        )
+        assertNotNull(admin)
+        assertTrue(admin!!.isAdmin)
+        repository.close()
+        context.deleteDatabase(CourseMarketDatabase.DATABASE_NAME)
+    }
+
+    @Test
     fun databaseHasRelatedTablesAndEnforcedForeignKeys() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         context.deleteDatabase(CourseMarketDatabase.DATABASE_NAME)
