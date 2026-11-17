@@ -149,4 +149,12 @@
     <string name="lesson_quiz_caption">Выбери один правильный ответ</string>
     <string name="empty_admin_orders">Заказов пока нет.</string>
     <string name="load_admin_orders_error">Не удалось загрузить заказы.</string>
+    <string name="auth_username_required">Введи логин.</string>
+    <string name="auth_password_required">Введи пароль.</string>
+    <string name="auth_generic_error">Не удалось выполнить вход.</string>
+    <string name="admin_delete_course_title">Удалить курс?</string>
+    <string name="admin_delete_course_message">Курс «%1$s» будет удалён из каталога. Если на него уже оформлялись заказы, удаление будет заблокировано внешним ключом.</string>
+    <string name="dialog_cancel">Отмена</string>
+    <string name="admin_course_deleted">Курс удалён из каталога.</string>
+    <string name="admin_course_delete_blocked">Нельзя удалить курс: он присутствует в истории заказов.</string>
 </resources>
