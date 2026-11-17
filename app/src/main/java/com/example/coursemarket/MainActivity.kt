@@ -177,6 +177,7 @@ class MainActivity : AppCompatActivity() {
     private var searchQuery = ""
     private val favorites = mutableSetOf<Int>()
     private val cart = mutableSetOf<Int>()
+    private val cartQuantities = mutableMapOf<Int, Int>()
     private val purchased = mutableSetOf<Int>()
     private val completedLessons = mutableMapOf<Int, MutableSet<Int>>()
     private var selectedPaymentMethod = "card"
@@ -261,8 +262,10 @@ class MainActivity : AppCompatActivity() {
         val userId = currentUser?.id ?: return
         favorites.clear()
         favorites.addAll(repository.favoriteCourseIds(userId))
+        cartQuantities.clear()
+        cartQuantities.putAll(repository.cartQuantities(userId))
         cart.clear()
-        cart.addAll(repository.cartCourseIds(userId))
+        cart.addAll(cartQuantities.keys)
         purchased.clear()
         purchased.addAll(repository.purchasedCourseIds(userId))
         completedLessons.clear()
@@ -288,10 +291,16 @@ class MainActivity : AppCompatActivity() {
 
         val userId = currentUser?.id ?: return
         val favoriteSnapshot = favorites.toSet()
-        val cartSnapshot = cart.toSet()
+        val quantitySnapshot = cartQuantities.toMap()
+        val cartSnapshot = quantitySnapshot.keys
         uiScope.launch {
             try {
-                repository.replaceFavoritesAndCart(userId, favoriteSnapshot, cartSnapshot)
+                repository.replaceFavoritesAndCart(
+                    userId,
+                    favoriteSnapshot,
+                    cartSnapshot,
+                    quantitySnapshot
+                )
             } catch (error: Exception) {
                 Toast.makeText(
                     this@MainActivity,
@@ -396,6 +405,7 @@ class MainActivity : AppCompatActivity() {
         currentUser = null
         favorites.clear()
         cart.clear()
+        cartQuantities.clear()
         purchased.clear()
         completedLessons.clear()
         showAuthScreen()
@@ -774,11 +784,12 @@ class MainActivity : AppCompatActivity() {
         contentBox.addView(text(items.size.toString() + " " + pluralCourses(items.size), 12, textSecondary))
         contentBox.addView(vSpace(9))
         items.forEach { course ->
+            val quantity = cartQuantities[course.id] ?: 1
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
                 background = rounded(surface, 16)
-                setPadding(dp(13), dp(13), dp(11), dp(13))
+                setPadding(dp(11), dp(13), dp(9), dp(13))
             }
             val colorTile = TextView(this).apply {
                 text = course.icon
@@ -788,25 +799,42 @@ class MainActivity : AppCompatActivity() {
                 setTextColor(textPrimary)
                 background = rounded(Color.parseColor(course.tint), 12)
             }
-            row.addView(colorTile, LinearLayout.LayoutParams(dp(48), dp(48)))
+            row.addView(colorTile, LinearLayout.LayoutParams(dp(44), dp(44)))
             val labels = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                setPadding(dp(11), 0, dp(6), 0)
+                setPadding(dp(9), 0, dp(5), 0)
             }
-            labels.addView(text(course.title, 13, textPrimary, true).apply { maxLines = 2 })
+            labels.addView(text(course.title, 12, textPrimary, true).apply { maxLines = 2 })
             labels.addView(vSpace(4))
-            labels.addView(text(course.duration + "  •  " + money(course.price), 11, accent, true))
+            labels.addView(text(course.duration + "  •  " + money(course.price) + " / шт.", 10, accent, true))
+            labels.addView(text("Сумма: " + money(course.price * quantity), 10, textSecondary))
             row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
-            row.addView(button("×", false, compact = true) {
+
+            val quantityControls = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+            }
+            quantityControls.addView(button("−", false, compact = true) {
+                changeCartQuantity(course, -1)
+            }, LinearLayout.LayoutParams(dp(32), dp(36)))
+            quantityControls.addView(text(quantity.toString(), 13, textPrimary, true).apply {
+                gravity = Gravity.CENTER
+            }, LinearLayout.LayoutParams(dp(25), dp(36)))
+            quantityControls.addView(button("+", false, compact = true) {
+                changeCartQuantity(course, 1)
+            }, LinearLayout.LayoutParams(dp(32), dp(36)))
+            quantityControls.addView(button("×", false, compact = true) {
                 cart.remove(course.id)
+                cartQuantities.remove(course.id)
                 saveState()
                 showCart()
-            }, LinearLayout.LayoutParams(dp(40), dp(40)))
+            }, LinearLayout.LayoutParams(dp(31), dp(36)))
+            row.addView(quantityControls)
             contentBox.addView(row, matchWrap())
             contentBox.addView(vSpace(9))
         }
 
-        val total = items.sumOf { it.price }
+        val total = items.sumOf { it.price * (cartQuantities[it.id] ?: 1) }
         val summary = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surfaceAlt, 18)
@@ -824,10 +852,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkout(items: List<Course>) {
-        showCheckout(items)
+        showCheckout(items, cartQuantities.toMap())
     }
 
-    private fun showCheckout(items: List<Course>) {
+    private fun showCheckout(items: List<Course>, quantities: Map<Int, Int>) {
         currentTab = "Корзина"
         render("Оформление заказа", "Проверь состав заказа и выбери демонстрационный способ оплаты.")
         contentBox.addView(button("← Вернуться в корзину", false) { showCart() }, matchWrap())
@@ -860,13 +888,14 @@ class MainActivity : AppCompatActivity() {
                 gravity = Gravity.CENTER_VERTICAL
                 setPadding(0, dp(5), 0, dp(5))
             }
-            row.addView(text(course.title, 12, textPrimary).apply { maxLines = 2 },
+            val quantity = quantities[course.id] ?: 1
+            row.addView(text(course.title + "  × " + quantity, 12, textPrimary).apply { maxLines = 2 },
                 LinearLayout.LayoutParams(0, -2, 1f))
-            row.addView(text(money(course.price), 13, textPrimary, true))
+            row.addView(text(money(course.price * quantity), 13, textPrimary, true))
             contentBox.addView(row)
         }
 
-        val total = items.sumOf { it.price }
+        val total = items.sumOf { it.price * (quantities[it.id] ?: 1) }
         val summary = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surfaceAlt, 16)
@@ -905,7 +934,7 @@ class MainActivity : AppCompatActivity() {
                     validation.text = "Укажи корректный адрес электронной почты."
                 !termsAccepted -> validation.text = "Подтверди, что понимаешь демонстрационный режим оплаты."
                 items.isEmpty() -> validation.text = "Корзина пуста."
-                else -> completeDemoOrder(items, buyerName, buyerEmail, selectedPaymentMethod)
+                else -> completeDemoOrder(items, quantities, buyerName, buyerEmail, selectedPaymentMethod)
             }
         }, LinearLayout.LayoutParams(-1, dp(50)))
         contentBox.addView(vSpace(18))
@@ -970,6 +999,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun completeDemoOrder(
         items: List<Course>,
+        quantities: Map<Int, Int>,
         buyerName: String,
         buyerEmail: String,
         paymentMethod: String
@@ -978,7 +1008,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Войди в аккаунт, чтобы оформить заказ.", Toast.LENGTH_SHORT).show()
             return
         }
-        val total = items.sumOf { it.price }
+        val total = items.sumOf { it.price * (quantities[it.id] ?: 1) }
         uiScope.launch {
             try {
                 val orderNumber = repository.createDemoOrder(
@@ -986,11 +1016,13 @@ class MainActivity : AppCompatActivity() {
                     buyerName,
                     buyerEmail,
                     paymentMethodName(paymentMethod),
-                    items
+                    items,
+                    quantities
                 )
                 items.forEach { course ->
                     purchased.add(course.id)
                     cart.remove(course.id)
+                    cartQuantities.remove(course.id)
                 }
                 prefs.edit()
                     .putString("buyer_name", buyerName)
@@ -1627,12 +1659,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun changeCartQuantity(course: Course, delta: Int) {
+        val next = (cartQuantities[course.id] ?: 1) + delta
+        if (next <= 0) {
+            cart.remove(course.id)
+            cartQuantities.remove(course.id)
+        } else {
+            cartQuantities[course.id] = next.coerceAtMost(99)
+        }
+        saveState()
+        refreshHeaderAndNav()
+        showCart()
+    }
+
     private fun addToCart(course: Course) {
         if (purchased.contains(course.id)) {
             Toast.makeText(this, "Этот курс уже находится в твоих покупках.", Toast.LENGTH_SHORT).show()
             return
         }
         if (cart.add(course.id)) {
+            cartQuantities[course.id] = 1
             saveState()
             refreshHeaderAndNav()
             Toast.makeText(this, "Курс добавлен в корзину.", Toast.LENGTH_SHORT).show()
