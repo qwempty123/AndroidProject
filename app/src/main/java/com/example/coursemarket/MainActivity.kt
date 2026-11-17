@@ -797,7 +797,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-        private fun showProfile() {
+    private fun showProfile() {
         currentTab = "Профиль"
         render("Твой профиль", "Личный кабинет CourseMarket.")
         val buyerName = prefs.getString("buyer_name", "").orEmpty().trim()
@@ -927,7 +927,7 @@ class MainActivity : AppCompatActivity() {
         contentBox.addView(vSpace(12))
     }
 
-        private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
+    private fun addCourseCard()course: Course, target: LinearLayout = contentBox) {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 18)
@@ -1210,7 +1210,7 @@ class MainActivity : AppCompatActivity() {
             labels.addView(text(module, 13, textPrimary, true))
             labels.addView(vSpace(4))
             labels.addView(text(
-                if (done) "Урок завершён" else "Урок " + (index + 1) + "  •  " + (12 + index * 3) + " мин",
+                if (done) "Урок завершён" else "Урок " + (index + 1) + "  •  материал и тест",
                 10, if (done) success else textSecondary
             ))
             row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
