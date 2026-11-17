@@ -336,7 +336,7 @@ class MainActivity : AppCompatActivity() {
             background = rounded(surface, 22)
             setPadding(dp(20), dp(22), dp(20), dp(22))
         }
-        card.addView(text("CourseMarket", 27, textPrimary, true))
+        card.addView(text(getString(R.string.app_name), 27, textPrimary, true))
         card.addView(vSpace(6))
         card.addView(text(getString(R.string.auth_subtitle), 12, textSecondary))
         card.addView(vSpace(18))
@@ -394,7 +394,7 @@ class MainActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(-1, dp(44)))
         card.addView(vSpace(16))
         card.addView(text(getString(R.string.auth_demo_admin), 10, gold))
-        card.addView(text("Демо-аккаунт администратора предназначен только для локальной защиты проекта.", 10, textSecondary))
+        card.addView(text(getString(R.string.admin_demo_hint), 10, textSecondary))
         scroll.addView(card)
         authRoot.addView(scroll, LinearLayout.LayoutParams(-1, -1))
         setContentView(authRoot)
@@ -436,10 +436,10 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        brandBlock.addView(text("CourseMarket", 22, textPrimary, true))
-        brandBlock.addView(text("ОБУЧЕНИЕ • ПРАКТИКА • РОСТ", 9, textSecondary, true))
+        brandBlock.addView(text(getString(R.string.app_name), 22, textPrimary, true))
+        brandBlock.addView(text(getString(R.string.brand_tagline), 9, textSecondary, true))
         header.addView(brandBlock, LinearLayout.LayoutParams(0, dp(48), 1f))
-        header.addView(button("▣  " + cart.size, false) { navigate("Корзина") })
+        header.addView(button(getString(R.string.header_cart_count, cart.size), false) { navigate("Корзина") })
         root.addView(header)
 
         val divider = View(this).apply { setBackgroundColor(Color.rgb(49, 47, 62)) }
@@ -531,7 +531,7 @@ class MainActivity : AppCompatActivity() {
         if (!::root.isInitialized) return
         val header = root.getChildAt(0) as? LinearLayout ?: return
         val cartButton = header.getChildAt(1) as? TextView
-        cartButton?.text = "▣  " + cart.size
+        cartButton?.text = getString(R.string.header_cart_count, cart.size)
         if (::bottomNavigation.isInitialized) {
             bottomNavigation.menu.findItem(
                 when (currentTab) {
@@ -547,19 +547,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun showHome() {
         currentTab = "Главная"
-        render("Учись новому.", "Подборка практических курсов для твоего следующего шага.")
+        render(getString(R.string.home_title), getString(R.string.home_subtitle))
         val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = gradient("#302747", "#4B3C68", 22)
             setPadding(dp(20), dp(19), dp(20), dp(19))
         }
-        hero.addView(badge("ТВОЁ СЛЕДУЮЩЕЕ НАЧИНАНИЕ", accentDark, accent))
+        hero.addView(badge(getString(R.string.home_badge), accentDark, accent))
         hero.addView(vSpace(13))
-        hero.addView(text("Прокачай навыки.\nСоздай больше.", 27, textPrimary, true))
+        hero.addView(text(getString(R.string.home_heading), 27, textPrimary, true))
         hero.addView(vSpace(8))
-        hero.addView(text("Курсы по разработке, дизайну и созданию игр — с понятной программой и практикой.", 13, Color.rgb(222, 216, 238)))
+        hero.addView(text(getString(R.string.home_description), 13, Color.rgb(222, 216, 238)))
         hero.addView(vSpace(17))
-        hero.addView(button("Открыть каталог  →", true) { navigate("Каталог") })
+        hero.addView(button(getString(R.string.home_open_catalog), true) { navigate("Каталог") })
         contentBox.addView(hero, matchWrap())
 
         val resumeCourse = courses.firstOrNull {
@@ -572,11 +572,11 @@ class MainActivity : AppCompatActivity() {
                 background = rounded(surface, 15)
                 setPadding(dp(15), dp(13), dp(15), dp(13))
             }
-            resumeCard.addView(text("ПРОДОЛЖИТЬ ОБУЧЕНИЕ", 9, accent, true))
+            resumeCard.addView(text(getString(R.string.home_resume_label), 9, accent, true))
             resumeCard.addView(vSpace(5))
             resumeCard.addView(text(resumeCourse.title, 14, textPrimary, true))
             resumeCard.addView(vSpace(9))
-            resumeCard.addView(button("Вернуться к уроку  →", true) {
+            resumeCard.addView(button(getString(R.string.home_resume_button), true) {
                 showCourseLearning(resumeCourse)
             })
             contentBox.addView(resumeCard, matchWrap())
@@ -591,10 +591,10 @@ class MainActivity : AppCompatActivity() {
         quickStats.addView(quickInfo("Офлайн", "каталог локально"), weighted(1f))
         contentBox.addView(quickStats, matchWrap())
 
-        sectionTitle("Популярное сейчас", "Выбор редакции")
+        sectionTitle(getString(R.string.home_featured), getString(R.string.home_featured_caption))
         listOf(3, 1, 2).forEach { id -> courses.first { it.id == id }.let { addCourseCard(it) } }
 
-        sectionTitle("Выбери направление", "Начни с того, что интересно")
+        sectionTitle(getString(R.string.home_categories), getString(R.string.home_categories_caption))
         listOf(
             "Разработка" to "Код, приложения и технологии",
             "Дизайн" to "Интерфейсы, графика и визуал",
@@ -621,7 +621,7 @@ class MainActivity : AppCompatActivity() {
             contentBox.addView(vSpace(8))
         }
 
-        sectionTitle("Почему CourseMarket", "Учиться проще, когда есть структура")
+        sectionTitle(getString(R.string.home_benefits), getString(R.string.home_benefits_caption))
         val benefits = listOf(
             "01" to ("Понятная программа" to "Каждый курс разбит на последовательные модули."),
             "02" to ("Практический результат" to "Знания закрепляются заданиями и проектами."),
@@ -647,7 +647,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun showCatalog() {
         currentTab = "Каталог"
-        render("Каталог курсов", courses.size.toString() + " программ в трёх направлениях")
+        render(getString(R.string.catalog_title), getString(R.string.catalog_subtitle, courses.size))
         val search = EditText(this).apply {
             hint = "Поиск по курсу, автору или теме"
             setHintTextColor(textSecondary)
@@ -686,7 +686,7 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        sortRow.addView(text("Сортировка", 12, textSecondary), LinearLayout.LayoutParams(0, -2, 1f))
+        sortRow.addView(text(getString(R.string.catalog_sort), 12, textSecondary), LinearLayout.LayoutParams(0, -2, 1f))
         listOf("Популярные", "Дешевле", "Дороже").forEach { sort ->
             val active = selectedSort == sort
             val chip = button(sort, active, compact = true) {
@@ -718,7 +718,7 @@ class MainActivity : AppCompatActivity() {
                     else -> list.sortedByDescending { it.rating.toDoubleOrNull() ?: 0.0 }
                 }
             }
-            results.addView(text("Найдено: " + filtered.size, 11, textSecondary))
+            results.addView(text(getString(R.string.catalog_found, filtered.size), 11, textSecondary))
             results.addView(vSpace(9))
             if (filtered.isEmpty()) {
                 results.addView(emptyState("Ничего не найдено", getString(R.string.empty_search)))
@@ -757,12 +757,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun showFavorites() {
         currentTab = "Избранное"
-        render("Избранное", "Сохранённые программы — всегда под рукой.")
+        render(getString(R.string.favorites_title), getString(R.string.favorites_subtitle))
         val list = courses.filter { favorites.contains(it.id) }
         if (list.isEmpty()) {
-            contentBox.addView(emptyState("Пока ничего нет", "Нажми на ♡ в карточке курса, чтобы сохранить его здесь."))
+            contentBox.addView(emptyState(getString(R.string.favorites_empty_title), getString(R.string.favorites_empty_description)))
             contentBox.addView(vSpace(12))
-            contentBox.addView(button("Найти курс", true) { navigate("Каталог") })
+            contentBox.addView(button(getString(R.string.find_course), true) { navigate("Каталог") })
         } else {
             contentBox.addView(text(list.size.toString() + " сохранено", 12, textSecondary))
             contentBox.addView(vSpace(10))
@@ -772,12 +772,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun showCart() {
         currentTab = "Корзина"
-        render("Корзина", "Проверь выбранные курсы перед оформлением.")
+        render(getString(R.string.cart_title), getString(R.string.cart_subtitle))
         val items = courses.filter { cart.contains(it.id) && !purchased.contains(it.id) }
         if (items.isEmpty()) {
-            contentBox.addView(emptyState("Корзина пуста", "Выбери подходящий курс в каталоге — он появится здесь."))
+            contentBox.addView(emptyState(getString(R.string.cart_empty_title), getString(R.string.cart_empty_description)))
             contentBox.addView(vSpace(12))
-            contentBox.addView(button("Перейти в каталог", true) { navigate("Каталог") })
+            contentBox.addView(button(getString(R.string.go_to_catalog), true) { navigate("Каталог") })
             return
         }
 
@@ -807,7 +807,7 @@ class MainActivity : AppCompatActivity() {
             labels.addView(text(course.title, 12, textPrimary, true).apply { maxLines = 2 })
             labels.addView(vSpace(4))
             labels.addView(text(course.duration + "  •  " + money(course.price) + " / шт.", 10, accent, true))
-            labels.addView(text("Сумма: " + money(course.price * quantity), 10, textSecondary))
+            labels.addView(text(getString(R.string.cart_line_total, money(course.price * quantity)), 10, textSecondary))
             row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
 
             val quantityControls = LinearLayout(this).apply {
@@ -840,13 +840,13 @@ class MainActivity : AppCompatActivity() {
             background = rounded(surfaceAlt, 18)
             setPadding(dp(17), dp(16), dp(17), dp(17))
         }
-        summary.addView(text("ИТОГО К ОПЛАТЕ", 10, textSecondary, true))
+        summary.addView(text(getString(R.string.cart_total_label), 10, textSecondary, true))
         summary.addView(vSpace(5))
         summary.addView(text(money(total), 28, textPrimary, true))
         summary.addView(vSpace(6))
-        summary.addView(text("Оплата в приложении не подключена. Оформление демонстрационное.", 11, textSecondary))
+        summary.addView(text(getString(R.string.cart_demo_note), 11, textSecondary))
         summary.addView(vSpace(13))
-        summary.addView(button("Оформить заказ  →", true) { checkout(items) })
+        summary.addView(button(getString(R.string.cart_checkout), true) { checkout(items) })
         contentBox.addView(vSpace(5))
         contentBox.addView(summary)
     }
@@ -857,23 +857,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun showCheckout(items: List<Course>, quantities: Map<Int, Int>) {
         currentTab = "Корзина"
-        render("Оформление заказа", "Проверь состав заказа и выбери демонстрационный способ оплаты.")
-        contentBox.addView(button("← Вернуться в корзину", false) { showCart() }, matchWrap())
+        render(getString(R.string.checkout_title), getString(R.string.checkout_subtitle))
+        contentBox.addView(button(getString(R.string.checkout_back), false) { showCart() }, matchWrap())
         contentBox.addView(vSpace(16))
 
-        sectionTitle("Данные покупателя", "Нужны для формирования демонстрационного чека")
-        val nameInput = checkoutInput("Имя и фамилия", InputType.TYPE_CLASS_TEXT,
+        sectionTitle(getString(R.string.buyer_section_title), getString(R.string.buyer_section_caption))
+        val nameInput = checkoutInput(getString(R.string.checkout_name_hint), InputType.TYPE_CLASS_TEXT,
             prefs.getString("buyer_name", "").orEmpty())
-        val emailInput = checkoutInput("Электронная почта", InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+        val emailInput = checkoutInput(getString(R.string.checkout_email_hint), InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
             prefs.getString("buyer_email", "").orEmpty())
         contentBox.addView(nameInput, matchWrap())
         contentBox.addView(vSpace(9))
         contentBox.addView(emailInput, matchWrap())
         contentBox.addView(vSpace(5))
 
-        sectionTitle("Способ оплаты", "Выбери, как должен выглядеть сценарий оплаты")
+        sectionTitle(getString(R.string.payment_section_title), getString(R.string.payment_section_caption))
         contentBox.addView(text(
-            "ДЕМО-РЕЖИМ: реальные деньги не списываются. Не вводи номер карты, CVC или банковские пароли.",
+            getString(R.string.payment_demo_warning),
             11, gold
         ))
         contentBox.addView(vSpace(10))
@@ -881,7 +881,7 @@ class MainActivity : AppCompatActivity() {
         contentBox.addView(paymentOptions)
         renderPaymentOptions(paymentOptions)
 
-        sectionTitle("Состав заказа")
+        sectionTitle(getString(R.string.order_items_title))
         items.forEach { course ->
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -901,7 +901,7 @@ class MainActivity : AppCompatActivity() {
             background = rounded(surfaceAlt, 16)
             setPadding(dp(16), dp(15), dp(16), dp(15))
         }
-        summary.addView(text("ИТОГО", 10, textSecondary, true))
+        summary.addView(text(getString(R.string.total_label), 10, textSecondary, true))
         summary.addView(vSpace(4))
         summary.addView(text(money(total), 27, textPrimary, true))
         contentBox.addView(vSpace(8))
@@ -909,15 +909,15 @@ class MainActivity : AppCompatActivity() {
         contentBox.addView(vSpace(12))
 
         var termsAccepted = false
-        val terms = text("□  Подтверждаю заказ и понимаю, что оплата работает в демонстрационном режиме.", 12, textSecondary)
+        val terms = text(getString(R.string.checkout_terms_unchecked), 12, textSecondary)
         terms.setPadding(dp(4), dp(8), dp(4), dp(8))
         terms.isClickable = true
         terms.setOnClickListener {
             termsAccepted = !termsAccepted
             terms.text = if (termsAccepted) {
-                "☑  Подтверждаю заказ и понимаю, что оплата работает в демонстрационном режиме."
+                getString(R.string.checkout_terms_checked)
             } else {
-                "□  Подтверждаю заказ и понимаю, что оплата работает в демонстрационном режиме."
+                getString(R.string.checkout_terms_unchecked)
             }
             terms.setTextColor(if (termsAccepted) success else textSecondary)
         }
@@ -925,7 +925,7 @@ class MainActivity : AppCompatActivity() {
         val validation = text("", 11, Color.rgb(255, 120, 130))
         validation.setPadding(dp(3), dp(3), dp(3), dp(8))
         contentBox.addView(validation)
-        contentBox.addView(button("Подтвердить демонстрационный заказ  →", true) {
+        contentBox.addView(button(getString(R.string.checkout_confirm), true) {
             val buyerName = nameInput.text.toString().trim()
             val buyerEmail = emailInput.text.toString().trim()
             when {
@@ -1061,7 +1061,7 @@ class MainActivity : AppCompatActivity() {
 
         private fun showProfile() {
         currentTab = "Профиль"
-        render("Твой профиль", "Личный кабинет CourseMarket.")
+        render(getString(R.string.profile_title), getString(R.string.profile_subtitle))
         val buyerName = prefs.getString("buyer_name", currentUser?.username.orEmpty()).orEmpty().trim()
         val greeting = if (buyerName.isBlank()) "Добро пожаловать!" else "Добро пожаловать, " + buyerName + "!"
         val panel = LinearLayout(this).apply {
@@ -1090,9 +1090,9 @@ class MainActivity : AppCompatActivity() {
             ) { navigate("Админ") }, matchWrap())
         }
 
-        sectionTitle("Моя статистика", "Твои действия и учебный прогресс")
+        sectionTitle(getString(R.string.profile_stats_title), getString(R.string.profile_stats_caption))
         val totalCompleted = completedLessons.values.sumOf { it.size }
-        contentBox.addView(text("Завершено уроков: " + totalCompleted, 11, textSecondary))
+        contentBox.addView(text(getString(R.string.profile_completed_lessons, totalCompleted), 11, textSecondary))
         contentBox.addView(vSpace(8))
         val stats = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -1111,7 +1111,7 @@ class MainActivity : AppCompatActivity() {
         }
         contentBox.addView(stats)
 
-        sectionTitle("Мои курсы", "Нажми на программу, чтобы продолжить обучение")
+        sectionTitle(getString(R.string.profile_courses_title), getString(R.string.profile_courses_caption))
         val owned = courses.filter { purchased.contains(it.id) }
         if (owned.isEmpty()) {
             contentBox.addView(emptyState(
@@ -1119,7 +1119,7 @@ class MainActivity : AppCompatActivity() {
                 "Выбери программу в каталоге и оформи демонстрационный заказ."
             ))
             contentBox.addView(vSpace(10))
-            contentBox.addView(button("Выбрать курс", true) { navigate("Каталог") })
+            contentBox.addView(button(getString(R.string.profile_choose_course), true) { navigate("Каталог") })
         } else {
             owned.forEach { course ->
                 val completed = progressFor(course).size
@@ -1162,18 +1162,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        sectionTitle("История заказов", "Оформления, сохранённые в локальной базе SQLite")
+        sectionTitle(getString(R.string.profile_orders_title), getString(R.string.profile_orders_caption))
         val orderContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         contentBox.addView(orderContainer, matchWrap())
         loadProfileOrders(orderContainer)
 
-        sectionTitle("О приложении")
+        sectionTitle(getString(R.string.about_title))
         val about = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 15)
             setPadding(dp(15), dp(14), dp(15), dp(14))
         }
-        about.addView(text("CourseMarket", 15, textPrimary, true))
+        about.addView(text(getString(R.string.app_name), 15, textPrimary, true))
         about.addView(vSpace(5))
         about.addView(text(
             "12 учебных программ с уроками, примерами, практическими заданиями и проверочными вопросами. Учётные записи, каталог, заказы и учебный прогресс хранятся в SQLite. Оплата демонстрационная.",
@@ -1191,7 +1191,7 @@ class MainActivity : AppCompatActivity() {
                 val orders = repository.ordersForUser(userId)
                 container.removeAllViews()
                 if (orders.isEmpty()) {
-                    container.addView(text("Заказов пока нет.", 11, textSecondary))
+                    container.addView(text(getString(R.string.empty_orders), 11, textSecondary))
                     return@launch
                 }
                 orders.forEach { order ->
@@ -1226,7 +1226,7 @@ class MainActivity : AppCompatActivity() {
                     container.addView(vSpace(8))
                 }
             } catch (error: Exception) {
-                container.addView(text("Не удалось загрузить историю заказов.", 11, gold))
+                container.addView(text(getString(R.string.load_orders_error), 11, gold))
             }
         }
     }
@@ -1246,7 +1246,7 @@ class MainActivity : AppCompatActivity() {
         }
         currentTab = "Админ"
         render(getString(R.string.admin_panel), "Управление каталогом, пользователями и заказами.")
-        contentBox.addView(button("← В профиль", false) { showProfile() }, matchWrap())
+        contentBox.addView(button(getString(R.string.admin_back_to_profile), false) { showProfile() }, matchWrap())
         contentBox.addView(vSpace(12))
 
         val overview = LinearLayout(this).apply {
@@ -1296,11 +1296,11 @@ class MainActivity : AppCompatActivity() {
             ))
             card.addView(vSpace(9))
             val actions = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            actions.addView(button("Изменить", false, compact = true) {
+            actions.addView(button(getString(R.string.admin_edit), false, compact = true) {
                 showEditCourseDialog(course)
             }, LinearLayout.LayoutParams(0, dp(40), 1f))
             actions.addView(hSpace(7))
-            actions.addView(button("Удалить", false, compact = true) {
+            actions.addView(button(getString(R.string.admin_delete), false, compact = true) {
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle("Удалить курс?")
                     .setMessage(
@@ -1513,7 +1513,7 @@ class MainActivity : AppCompatActivity() {
                 val orders = repository.allOrders()
                 container.removeAllViews()
                 if (orders.isEmpty()) {
-                    container.addView(text("Заказов пока нет.", 11, textSecondary))
+                    container.addView(text(getString(R.string.empty_orders), 11, textSecondary))
                     return@launch
                 }
                 orders.forEach { order ->
@@ -1540,7 +1540,7 @@ class MainActivity : AppCompatActivity() {
                     container.addView(vSpace(7))
                 }
             } catch (_: Exception) {
-                container.addView(text("Не удалось загрузить заказы.", 11, gold))
+                container.addView(text(getString(R.string.load_admin_orders_error), 11, gold))
             }
         }
     }
@@ -1584,7 +1584,7 @@ class MainActivity : AppCompatActivity() {
         }
         artLabels.addView(badge(course.category.uppercase(), Color.argb(45, 255, 255, 255), textPrimary))
         artLabels.addView(vSpace(7))
-        artLabels.addView(text("ПРАКТИЧЕСКИЙ КУРС", 9, Color.rgb(235, 231, 243), true))
+        artLabels.addView(text(getString(R.string.course_practical_badge), 9, Color.rgb(235, 231, 243), true))
         artwork.addView(artLabels, LinearLayout.LayoutParams(0, -2, 1f))
         artwork.addView(text(course.icon, 36, textPrimary, true).apply {
             gravity = Gravity.CENTER
@@ -1598,7 +1598,7 @@ class MainActivity : AppCompatActivity() {
         }
         card.addView(title)
         card.addView(vSpace(5))
-        card.addView(text("Автор: " + course.author, 11, textSecondary))
+        card.addView(text(getString(R.string.course_author_format, course.author), 11, textSecondary))
         card.addView(vSpace(8))
         card.addView(text(course.description, 12, textSecondary).apply {
             maxLines = 3
@@ -1610,9 +1610,9 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        meta.addView(text("★ " + course.rating, 11, gold, true))
+        meta.addView(text(getString(R.string.course_rating_format, course.rating), 11, gold, true))
         meta.addView(hSpace(13))
-        meta.addView(text("◷ " + course.duration, 11, textSecondary))
+        meta.addView(text(getString(R.string.course_duration_format, course.duration), 11, textSecondary))
         meta.addView(hSpace(13))
         meta.addView(text(course.lessons.toString() + " уроков", 11, textSecondary))
         card.addView(meta)
@@ -1641,7 +1641,7 @@ class MainActivity : AppCompatActivity() {
         }, LinearLayout.LayoutParams(-2, dp(42)))
         card.addView(priceRow)
         card.addView(vSpace(8))
-        card.addView(button("Программа курса  →", true) { showDetails(course) }, LinearLayout.LayoutParams(-1, dp(43)))
+        card.addView(button(getString(R.string.course_open_curriculum), true) { showDetails(course) }, LinearLayout.LayoutParams(-1, dp(43)))
 
         target.addView(card, matchWrap())
         target.addView(vSpace(11))
@@ -1697,7 +1697,7 @@ class MainActivity : AppCompatActivity() {
         body.addView(vSpace(13))
         body.addView(text(course.title, 22, textPrimary, true))
         body.addView(vSpace(8))
-        body.addView(text("Автор: " + course.author, 12, textSecondary))
+        body.addView(text(getString(R.string.course_author_format, course.author), 12, textSecondary))
         body.addView(vSpace(11))
         body.addView(text(course.description, 13, textSecondary))
         body.addView(vSpace(15))
@@ -1737,7 +1737,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         body.addView(vSpace(14))
-        body.addView(text("Стоимость курса", 11, textSecondary))
+        body.addView(text(getString(R.string.course_price_label), 11, textSecondary))
         body.addView(vSpace(3))
         body.addView(text(money(course.price), 26, textPrimary, true))
         body.addView(vSpace(12))
@@ -1821,8 +1821,8 @@ class MainActivity : AppCompatActivity() {
         val completed = progressFor(course)
         val totalLessons = course.modules.size
         val progress = courseProgress(course)
-        render("Моё обучение", course.title)
-        contentBox.addView(button("← Назад в профиль", false) { showProfile() }, matchWrap())
+        render(getString(R.string.learning_title), course.title)
+        contentBox.addView(button(getString(R.string.learning_back_to_profile), false) { showProfile() }, matchWrap())
         contentBox.addView(vSpace(13))
 
         val hero = LinearLayout(this).apply {
@@ -1834,9 +1834,9 @@ class MainActivity : AppCompatActivity() {
         hero.addView(vSpace(11))
         hero.addView(text(course.title, 20, textPrimary, true))
         hero.addView(vSpace(5))
-        hero.addView(text("Преподаватель: " + course.author, 11, Color.rgb(226, 222, 236)))
+        hero.addView(text(getString(R.string.learning_teacher_format, course.author), 11, Color.rgb(226, 222, 236)))
         hero.addView(vSpace(13))
-        hero.addView(text("ПРОГРЕСС  " + completed.size + " ИЗ " + totalLessons + " УРОКОВ  •  " + progress + "%", 10, textPrimary, true))
+        hero.addView(text(getString(R.string.learning_progress_format, completed.size, totalLessons, progress), 10, textPrimary, true))
         hero.addView(vSpace(8))
         val bar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
@@ -1855,7 +1855,7 @@ class MainActivity : AppCompatActivity() {
         })
         contentBox.addView(hero, matchWrap())
 
-        sectionTitle("Программа обучения", "Открывай уроки по порядку или возвращайся к пройденным")
+        sectionTitle(getString(R.string.learning_curriculum_title), getString(R.string.learning_curriculum_caption))
         course.modules.forEachIndexed { index, module ->
             val done = index in completed
             val row = LinearLayout(this).apply {
@@ -1925,7 +1925,7 @@ class MainActivity : AppCompatActivity() {
         val wasCompleted = lessonIndex in completed
         render(lesson.title, course.title + "  •  Урок " + (lessonIndex + 1) + " из " + course.modules.size)
 
-        contentBox.addView(button("← К программе курса", false) { showCourseLearning(course) }, matchWrap())
+        contentBox.addView(button(getString(R.string.lesson_back_to_course), false) { showCourseLearning(course) }, matchWrap())
         contentBox.addView(vSpace(13))
 
         val intro = LinearLayout(this).apply {
@@ -1933,14 +1933,14 @@ class MainActivity : AppCompatActivity() {
             background = rounded(surface, 16)
             setPadding(dp(16), dp(15), dp(16), dp(15))
         }
-        intro.addView(badge("ТЕОРИЯ", accentDark, accent))
+        intro.addView(badge(getString(R.string.lesson_theory_badge), accentDark, accent))
         intro.addView(vSpace(10))
         intro.addView(text(lesson.introduction, 13, textPrimary).apply {
             setLineSpacing(dp(3).toFloat(), 1.03f)
         })
         contentBox.addView(intro, matchWrap())
 
-        sectionTitle("Ключевые идеи")
+        sectionTitle(getString(R.string.lesson_key_ideas))
         lesson.keyPoints.forEachIndexed { index, point ->
             val line = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -1954,7 +1954,7 @@ class MainActivity : AppCompatActivity() {
             contentBox.addView(vSpace(7))
         }
 
-        sectionTitle("Разбор примера")
+        sectionTitle(getString(R.string.lesson_example_title))
         val example = TextView(this).apply {
             text = lesson.example
             textSize = 12f
@@ -1967,18 +1967,18 @@ class MainActivity : AppCompatActivity() {
         }
         contentBox.addView(example, matchWrap())
 
-        sectionTitle("Практическое задание")
+        sectionTitle(getString(R.string.lesson_practice_title))
         val practice = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 14)
             setPadding(dp(14), dp(13), dp(14), dp(13))
         }
-        practice.addView(badge("ПОПРОБУЙ САМ", accentDark, accent))
+        practice.addView(badge(getString(R.string.lesson_try_it_badge), accentDark, accent))
         practice.addView(vSpace(9))
         practice.addView(text(lesson.practice, 12, textPrimary))
         contentBox.addView(practice, matchWrap())
 
-        sectionTitle("Проверь себя", "Выбери один правильный ответ")
+        sectionTitle(getString(R.string.lesson_quiz_title), getString(R.string.lesson_quiz_caption))
         val quiz = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 15)
@@ -2018,7 +2018,7 @@ class MainActivity : AppCompatActivity() {
         quiz.addView(result)
 
         lateinit var finishButton: TextView
-        val checkButton = button("Проверить ответ", true) {
+        val checkButton = button(getString(R.string.lesson_check_answer), true) {
             when {
                 selectedAnswer < 0 -> result.text = "Сначала выбери один из вариантов ответа."
                 selectedAnswer == lesson.correctAnswer -> {
