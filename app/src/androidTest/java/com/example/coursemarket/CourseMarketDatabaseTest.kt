@@ -86,6 +86,22 @@ class CourseMarketDatabaseTest {
     }
 
     @Test
+    fun registrationRejectsEmptyCredentials() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        context.deleteDatabase(CourseMarketDatabase.DATABASE_NAME)
+        val repository = CourseMarketRepository(context)
+        repository.initialize(emptyList())
+
+        val failure = try {
+            repository.register("", "")
+            null
+        } catch (error: IllegalArgumentException) {
+            error
+        }
+        assertNotNull(failure)
+    }
+
+    @Test
     fun databaseHasRelatedTablesAndEnforcedForeignKeys() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         context.deleteDatabase(CourseMarketDatabase.DATABASE_NAME)
