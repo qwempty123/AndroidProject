@@ -163,7 +163,8 @@ class CourseMarketRepository(context: Context) {
     suspend fun replaceFavoritesAndCart(
         userId: Long,
         favoriteIds: Set<Int>,
-        cartIds: Set<Int>
+        cartIds: Set<Int>,
+        quantities: Map<Int, Int> = cartIds.associateWith { 1 }
     ) = withContext(Dispatchers.IO) {
         val db = database.writableDatabase
         db.beginTransaction()
@@ -187,7 +188,7 @@ class CourseMarketRepository(context: Context) {
                     ContentValues().apply {
                         put("user_id", userId)
                         put("course_id", courseId)
-                        put("quantity", 1)
+                        put("quantity", (quantities[courseId] ?: 1).coerceAtLeast(1))
                     },
                     SQLiteDatabase.CONFLICT_IGNORE
                 )
@@ -239,6 +240,40 @@ class CourseMarketRepository(context: Context) {
         }
         ids
     }
+
+    suspend fun cartQuantities(userId: Long): Map<Int, Int> = withContext(Dispatchers.IO) {
+        val quantities = mutableMapOf<Int, Int>()
+        database.readableDatabase.rawQuery(
+            "SELECT course_id, quantity FROM cart_items WHERE user_id = ?",
+            arrayOf(userId.toString())
+        ).use { cursor ->
+            while (cursor.moveToNext()) quantities[cursor.getInt(0)] = cursor.getInt(1)
+        }
+        quantities
+    }
+
+    suspend fun setCartQuantity(userId: Long, courseId: Int, quantity: Int) =
+        withContext(Dispatchers.IO) {
+            val db = database.writableDatabase
+            if (quantity <= 0) {
+                db.delete(
+                    "cart_items", "user_id = ? AND course_id = ?",
+                    arrayOf(userId.toString(), courseId.toString())
+                )
+            } else {
+                val values = ContentValues().apply { put("quantity", quantity.coerceAtMost(99)) }
+                val changed = db.update(
+                    "cart_items", values,
+                    "user_id = ? AND course_id = ?",
+                    arrayOf(userId.toString(), courseId.toString())
+                )
+                if (changed == 0) {
+                    values.put("user_id", userId)
+                    values.put("course_id", courseId)
+                    db.insertOrThrow("cart_items", null, values)
+                }
+            }
+        }
 
     suspend fun addToCart(userId: Long, courseId: Int) = withContext(Dispatchers.IO) {
         val values = ContentValues().apply {
@@ -350,7 +385,8 @@ class CourseMarketRepository(context: Context) {
         customerName: String,
         customerEmail: String,
         paymentMethod: String,
-        items: List<Course>
+        items: List<Course>,
+        quantities: Map<Int, Int> = emptyMap()
     ): String = withContext(Dispatchers.IO) {
         require(items.isNotEmpty()) { "Корзина пуста." }
         require(customerName.trim().length >= 2) { "Укажи имя покупателя." }
@@ -369,7 +405,7 @@ class CourseMarketRepository(context: Context) {
                 put("customer_email", customerEmail.trim())
                 put("payment_method", paymentMethod)
                 put("status", "CREATED_DEMO")
-                put("total", items.sumOf { it.price })
+                put("total", items.sumOf { it.price * (quantities[it.id] ?: 1).coerceAtLeast(1) })
             }
             val orderId = db.insertOrThrow("orders", null, orderValues)
             items.forEach { course ->
@@ -379,7 +415,7 @@ class CourseMarketRepository(context: Context) {
                     ContentValues().apply {
                         put("order_id", orderId)
                         put("course_id", course.id)
-                        put("quantity", 1)
+                        put("quantity", (quantities[course.id] ?: 1).coerceIn(1, 99))
                         put("unit_price", course.price)
                     }
                 )
@@ -410,7 +446,7 @@ class CourseMarketRepository(context: Context) {
             """
             SELECT o.id, o.order_number, u.username, o.customer_name, o.customer_email,
                    o.payment_method, o.status, o.total, o.created_at,
-                   (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
+                   (SELECT COALESCE(SUM(oi.quantity), 0) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
             FROM orders o
             INNER JOIN users u ON u.id = o.user_id
             $where
