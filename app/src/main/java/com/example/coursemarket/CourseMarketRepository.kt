@@ -160,6 +160,44 @@ class CourseMarketRepository(context: Context) {
         }
     }
 
+    suspend fun replaceFavoritesAndCart(
+        userId: Long,
+        favoriteIds: Set<Int>,
+        cartIds: Set<Int>
+    ) = withContext(Dispatchers.IO) {
+        val db = database.writableDatabase
+        db.beginTransaction()
+        try {
+            db.delete("favorites", "user_id = ?", arrayOf(userId.toString()))
+            favoriteIds.forEach { courseId ->
+                db.insertWithOnConflict(
+                    "favorites", null,
+                    ContentValues().apply {
+                        put("user_id", userId)
+                        put("course_id", courseId)
+                    },
+                    SQLiteDatabase.CONFLICT_IGNORE
+                )
+            }
+
+            db.delete("cart_items", "user_id = ?", arrayOf(userId.toString()))
+            cartIds.forEach { courseId ->
+                db.insertWithOnConflict(
+                    "cart_items", null,
+                    ContentValues().apply {
+                        put("user_id", userId)
+                        put("course_id", courseId)
+                        put("quantity", 1)
+                    },
+                    SQLiteDatabase.CONFLICT_IGNORE
+                )
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
     suspend fun favoriteCourseIds(userId: Long): Set<Int> = withContext(Dispatchers.IO) {
         val ids = mutableSetOf<Int>()
         database.readableDatabase.rawQuery(
