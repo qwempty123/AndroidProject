@@ -359,7 +359,7 @@ class MainActivity : AppCompatActivity() {
         card.addView(password, matchWrap())
         card.addView(vSpace(12))
 
-        val feedback = text(message.orEmpty(), 11, Color.rgb(255, 130, 140))
+        val feedback = text(message.orEmpty(), 11, getColor(R.color.auth_error))
         card.addView(feedback)
         card.addView(vSpace(5))
         card.addView(button(
@@ -456,7 +456,7 @@ class MainActivity : AppCompatActivity() {
         header.addView(button(getString(R.string.header_cart_count, cart.size), false) { navigate("Корзина") })
         root.addView(header)
 
-        val divider = View(this).apply { setBackgroundColor(Color.rgb(49, 47, 62)) }
+        val divider = View(this).apply { setBackgroundColor(getColor(R.color.divider_color)) }
         root.addView(divider, LinearLayout.LayoutParams(-1, dp(1)))
 
         screenContainerId = R.id.screen_container
@@ -564,14 +564,14 @@ class MainActivity : AppCompatActivity() {
         render(getString(R.string.home_title), getString(R.string.home_subtitle))
         val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = gradient("#302747", "#4B3C68", 22)
+            background = gradient(getColor(R.color.home_gradient_start), getColor(R.color.home_gradient_end), 22)
             setPadding(dp(20), dp(19), dp(20), dp(19))
         }
         hero.addView(badge(getString(R.string.home_badge), accentDark, accent))
         hero.addView(vSpace(13))
         hero.addView(text(getString(R.string.home_heading), 27, textPrimary, true))
         hero.addView(vSpace(8))
-        hero.addView(text(getString(R.string.home_description), 13, Color.rgb(222, 216, 238)))
+        hero.addView(text(getString(R.string.home_description), 13, getColor(R.color.text_on_gradient)))
         hero.addView(vSpace(17))
         hero.addView(button(getString(R.string.home_open_catalog), true) { navigate("Каталог") })
         contentBox.addView(hero, matchWrap())
@@ -936,7 +936,7 @@ class MainActivity : AppCompatActivity() {
             terms.setTextColor(if (termsAccepted) success else textSecondary)
         }
         contentBox.addView(terms)
-        val validation = text("", 11, Color.rgb(255, 120, 130))
+        val validation = text("", 11, getColor(R.color.validation_error))
         validation.setPadding(dp(3), dp(3), dp(3), dp(8))
         contentBox.addView(validation)
         contentBox.addView(button(getString(R.string.checkout_confirm), true) {
@@ -1080,7 +1080,7 @@ class MainActivity : AppCompatActivity() {
         val greeting = if (buyerName.isBlank()) "Добро пожаловать!" else "Добро пожаловать, " + buyerName + "!"
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = gradient("#302747", "#42365E", 19)
+            background = gradient(getColor(R.color.profile_gradient_start), getColor(R.color.profile_gradient_end), 19)
             setPadding(dp(18), dp(18), dp(18), dp(18))
         }
         panel.addView(badge(
@@ -1092,7 +1092,7 @@ class MainActivity : AppCompatActivity() {
         panel.addView(vSpace(5))
         panel.addView(text(
             "Учись в своём темпе и возвращайся к урокам в любой момент.",
-            12, Color.rgb(222, 216, 238)
+            12, getColor(R.color.text_on_gradient)
         ))
         contentBox.addView(panel)
 
@@ -1591,7 +1591,7 @@ class MainActivity : AppCompatActivity() {
         val artwork = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            background = gradient(course.tint, "#282538", 14)
+            background = gradient(Color.parseColor(course.tint), getColor(R.color.course_gradient_end), 14)
             setPadding(dp(14), dp(12), dp(14), dp(12))
             minimumHeight = dp(92)
         }
@@ -1600,7 +1600,7 @@ class MainActivity : AppCompatActivity() {
         }
         artLabels.addView(badge(course.category.uppercase(), Color.argb(45, 255, 255, 255), textPrimary))
         artLabels.addView(vSpace(7))
-        artLabels.addView(text(getString(R.string.course_practical_badge), 9, Color.rgb(235, 231, 243), true))
+        artLabels.addView(text(getString(R.string.course_practical_badge), 9, getColor(R.color.course_artwork_text), true))
         artwork.addView(artLabels, LinearLayout.LayoutParams(0, -2, 1f))
         artwork.addView(text(course.icon, 36, textPrimary, true).apply {
             gravity = Gravity.CENTER
@@ -1843,14 +1843,14 @@ class MainActivity : AppCompatActivity() {
 
         val hero = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = gradient(course.tint, "#29263A", 18)
+            background = gradient(Color.parseColor(course.tint), getColor(R.color.lesson_gradient_end), 18)
             setPadding(dp(17), dp(17), dp(17), dp(17))
         }
         hero.addView(badge(course.category.uppercase(), Color.argb(45, 255, 255, 255), textPrimary))
         hero.addView(vSpace(11))
         hero.addView(text(course.title, 20, textPrimary, true))
         hero.addView(vSpace(5))
-        hero.addView(text(getString(R.string.learning_teacher_format, course.author), 11, Color.rgb(226, 222, 236)))
+        hero.addView(text(getString(R.string.learning_teacher_format, course.author), 11, getColor(R.color.text_on_gradient)))
         hero.addView(vSpace(13))
         hero.addView(text(getString(R.string.learning_progress_format, completed.size, totalLessons, progress), 10, textPrimary, true))
         hero.addView(vSpace(8))
@@ -1975,10 +1975,10 @@ class MainActivity : AppCompatActivity() {
             text = lesson.example
             setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx(12))
             typeface = Typeface.MONOSPACE
-            setTextColor(Color.rgb(220, 213, 244))
+            setTextColor(getColor(R.color.lesson_answer_text))
             includeFontPadding = false
             setPadding(dp(14), dp(14), dp(14), dp(14))
-            background = rounded(Color.rgb(24, 23, 33), 13)
+            background = rounded(getColor(R.color.lesson_answer_surface), 13)
             setLineSpacing(dp(3).toFloat(), 1.0f)
         }
         contentBox.addView(example, matchWrap())
@@ -2044,7 +2044,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 else -> {
                     result.text = "Пока неверно. Перечитай ключевые идеи и попробуй ещё раз."
-                    result.setTextColor(Color.rgb(255, 150, 145))
+                    result.setTextColor(getColor(R.color.lesson_answer_error))
                 }
             }
         }
@@ -2158,7 +2158,7 @@ class MainActivity : AppCompatActivity() {
         primary: Boolean,
         compact: Boolean = false,
         action: () -> Unit
-    ): TextView = text(label, if (compact) 11 else 13, if (primary) Color.rgb(29, 23, 43) else textPrimary, true).apply {
+    ): TextView = text(label, if (compact) 11 else 13, if (primary) getColor(R.color.button_text_on_accent) else textPrimary, true).apply {
         gravity = Gravity.CENTER
         minHeight = dp(42)
         setPadding(dp(if (compact) 10 else 14), dp(1), dp(if (compact) 10 else 14), dp(1))
@@ -2185,10 +2185,10 @@ class MainActivity : AppCompatActivity() {
             cornerRadius = dp(radius).toFloat()
         }
 
-    private fun gradient(start: String, end: String, radius: Int): GradientDrawable =
+    private fun gradient(start: Int, end: Int, radius: Int): GradientDrawable =
         GradientDrawable(
             GradientDrawable.Orientation.TL_BR,
-            intArrayOf(Color.parseColor(start), Color.parseColor(end))
+            intArrayOf(start, end)
         ).apply {
             cornerRadius = dp(radius).toFloat()
         }
