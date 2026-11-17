@@ -28,11 +28,11 @@
 ## Этап 5. Тестирование
 - Добавлены unit-тесты учебной базы.
 - Добавлены instrumented tests репозитория и SQLite.
-- Создан GitHub Actions workflow: unit tests, assembleDebug и сохранение APK artifact.
+- GitHub Actions выполняет unit tests, assembleDebug и connectedDebugAndroidTest на Android Emulator API 35; после успешных проверок сохраняет APK artifact.
 - Перед сдачей необходимо пройти ручные тест-кейсы, включая поворот экрана и пустые поля.
 
 ## Этап 6. Защита проекта
 - README, руководство пользователя и администратора, анализ предметной области, схема БД и план тестирования размещены в doc/.
 - Debug APK создаётся через `assembleDebug`.
-- После успешного CI-запуска APK публикуется как artifact, который можно скачать на другом компьютере.
+- После успешного CI-запуска APK публикуется как artifact; отдельный workflow `Publish CourseMarket APK Release` собирает и прикладывает APK к GitHub Release.
 - Для финальной защиты рекомендуется добавить скриншоты реального приложения в README и приложить полученный APK.
