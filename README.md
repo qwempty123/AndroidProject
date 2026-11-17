@@ -36,6 +36,8 @@ CourseMarket is a Kotlin + Android Views learning marketplace prototype. It comb
 4. Select the `app` run configuration and an emulator or connected Android device.
 5. Run the application.
 
+To run the course-content unit tests on Windows, use `gradlew.bat testDebugUnitTest` from the project root. The tests verify lesson counts and the required theory, examples, exercises and quiz data for all 12 courses.
+
 ## Important demo limitations
 
 This is a self-contained local prototype. Course materials are bundled in the application; favorites, cart, purchases, order history and lesson progress are stored on the current device.
