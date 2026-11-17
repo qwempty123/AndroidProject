@@ -12,11 +12,13 @@ import android.util.Patterns
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.ScrollView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -24,6 +26,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -59,7 +70,7 @@ class MainActivity : AppCompatActivity() {
     private val success = Color.rgb(132, 210, 170)
     private val gold = Color.rgb(244, 202, 129)
 
-    private val courses = listOf(
+    private var courses: List<Course> = listOf(
         Course(
             1, "Kotlin: от основ до Android-приложения", "Разработка", "Алексей Морозов",
             "Последовательно изучи Kotlin и собери Android-приложение с интерфейсом, навигацией и локальным хранением данных. В конце курса у тебя будет законченный учебный проект.",
@@ -148,7 +159,16 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var root: LinearLayout
     private lateinit var contentBox: LinearLayout
-    private lateinit var navItems: Map<String, LinearLayout>
+    private lateinit var bottomNavigation: BottomNavigationView
+    private val repository by lazy { CourseMarketRepository(applicationContext) }
+    private val uiScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private var currentUser: UserAccount? = null
+    private var currentLearningCourseId = -1
+    private var currentLearningLessonIndex = -1
+    private var restoredTab = "Главная"
+    private var restoredCategory = "Все"
+    private var restoredSearch = ""
+    private var restoredSort = "Популярные"
     private var currentTab = "Главная"
     private var selectedCategory = "Все"
     private var selectedSort = "Популярные"
@@ -162,21 +182,91 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadState()
-        buildShell()
-        showHome()
+        restoredTab = savedInstanceState?.getString("screen_tab") ?: "Главная"
+        restoredCategory = savedInstanceState?.getString("screen_category") ?: "Все"
+        restoredSearch = savedInstanceState?.getString("screen_search") ?: ""
+        restoredSort = savedInstanceState?.getString("screen_sort") ?: "Популярные"
+        currentLearningCourseId = savedInstanceState?.getInt("learning_course_id", -1) ?: -1
+        currentLearningLessonIndex = savedInstanceState?.getInt("learning_lesson_index", -1) ?: -1
+
+        uiScope.launch {
+            try {
+                repository.initialize(courses)
+                val sessionId = prefs.getLong("session_user_id", -1L)
+                val account = if (sessionId > 0) repository.userById(sessionId) else null
+                if (account != null) {
+                    enterAuthenticatedApp(account, restore = true)
+                } else {
+                    currentUser = null
+                    showAuthScreen()
+                }
+            } catch (error: Exception) {
+                showStartupError(error)
+            }
+        }
     }
 
-    private fun loadState() {
-        favorites.addAll(readIds("favorites"))
-        cart.addAll(readIds("cart"))
-        purchased.addAll(readIds("purchased"))
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("screen_tab", currentTab)
+        outState.putString("screen_category", selectedCategory)
+        outState.putString("screen_search", searchQuery)
+        outState.putString("screen_sort", selectedSort)
+        outState.putInt("learning_course_id", currentLearningCourseId)
+        outState.putInt("learning_lesson_index", currentLearningLessonIndex)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onDestroy() {
+        uiScope.cancel()
+        super.onDestroy()
+    }
+
+    private suspend fun enterAuthenticatedApp(account: UserAccount, restore: Boolean) {
+        currentUser = account
+        prefs.edit()
+            .putLong("session_user_id", account.id)
+            .putString("session_username", account.username)
+            .apply()
+        courses = repository.getCourses().ifEmpty { courses }
+        loadState()
+        buildShell()
+        if (!restore) {
+            currentTab = "Главная"
+            showHome()
+            return
+        }
+        selectedCategory = restoredCategory
+        searchQuery = restoredSearch
+        selectedSort = restoredSort
+        when (restoredTab) {
+            "Каталог" -> showCatalog()
+            "Избранное" -> showFavorites()
+            "Корзина" -> showCart()
+            "Профиль" -> {
+                val course = courses.firstOrNull { it.id == currentLearningCourseId }
+                when {
+                    course != null && currentLearningLessonIndex >= 0 ->
+                        showLesson(course, currentLearningLessonIndex)
+                    course != null -> showCourseLearning(course)
+                    else -> showProfile()
+                }
+            }
+            else -> showHome()
+        }
+    }
+
+    private suspend fun loadState() {
+        val userId = currentUser?.id ?: return
+        favorites.clear()
+        favorites.addAll(repository.favoriteCourseIds(userId))
+        cart.clear()
+        cart.addAll(repository.cartCourseIds(userId))
+        purchased.clear()
+        purchased.addAll(repository.purchasedCourseIds(userId))
+        completedLessons.clear()
+        completedLessons.putAll(repository.completedLessonIndexes(userId))
         courses.forEach { course ->
-            val saved = prefs.getString("progress_" + course.id, "").orEmpty()
-            completedLessons[course.id] = saved.split(",")
-                .mapNotNull { it.toIntOrNull() }
-                .filter { it in course.modules.indices }
-                .toMutableSet()
+            completedLessons.putIfAbsent(course.id, mutableSetOf())
         }
     }
 
@@ -193,6 +283,120 @@ class MainActivity : AppCompatActivity() {
             .putString("cart", cart.joinToString(","))
             .putString("purchased", purchased.joinToString(","))
             .apply()
+
+        val userId = currentUser?.id ?: return
+        val favoriteSnapshot = favorites.toSet()
+        val cartSnapshot = cart.toSet()
+        uiScope.launch {
+            try {
+                repository.replaceFavoritesAndCart(userId, favoriteSnapshot, cartSnapshot)
+            } catch (error: Exception) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Не удалось сохранить корзину или избранное.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun showStartupError(error: Exception) {
+        Toast.makeText(
+            this,
+            getString(R.string.database_error) + " " + (error.message ?: ""),
+            Toast.LENGTH_LONG
+        ).show()
+        showAuthScreen()
+    }
+
+    private fun showAuthScreen(registerMode: Boolean = false, message: String? = null) {
+        val authRoot = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setBackgroundColor(bg)
+            setPadding(dp(22), dp(18), dp(22), dp(18))
+        }
+        val scroll = ScrollView(this).apply {
+            isFillViewport = true
+            overScrollMode = View.OVER_SCROLL_NEVER
+        }
+        val card = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            background = rounded(surface, 22)
+            setPadding(dp(20), dp(22), dp(20), dp(22))
+        }
+        card.addView(text("CourseMarket", 27, textPrimary, true))
+        card.addView(vSpace(6))
+        card.addView(text(getString(R.string.auth_subtitle), 12, textSecondary))
+        card.addView(vSpace(18))
+        card.addView(text(
+            if (registerMode) getString(R.string.auth_register) else getString(R.string.auth_title),
+            20, textPrimary, true
+        ))
+        card.addView(vSpace(13))
+
+        val username = checkoutInput(getString(R.string.auth_username), InputType.TYPE_CLASS_TEXT, "")
+        val password = checkoutInput(
+            getString(R.string.auth_password),
+            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            ""
+        )
+        card.addView(username, matchWrap())
+        card.addView(vSpace(9))
+        card.addView(password, matchWrap())
+        card.addView(vSpace(12))
+
+        val feedback = text(message.orEmpty(), 11, Color.rgb(255, 130, 140))
+        card.addView(feedback)
+        card.addView(vSpace(5))
+        card.addView(button(
+            if (registerMode) getString(R.string.auth_register) else getString(R.string.auth_login),
+            true
+        ) {
+            val loginValue = username.text.toString().trim()
+            val passwordValue = password.text.toString()
+            feedback.text = ""
+            uiScope.launch {
+                try {
+                    val account = if (registerMode) {
+                        repository.register(loginValue, passwordValue)
+                    } else {
+                        repository.login(loginValue, passwordValue)
+                    }
+                    if (account == null) {
+                        feedback.text = getString(R.string.auth_login_error)
+                    } else {
+                        enterAuthenticatedApp(account, restore = false)
+                    }
+                } catch (error: Exception) {
+                    feedback.text = error.message ?: "Не удалось выполнить вход."
+                }
+            }
+        }, LinearLayout.LayoutParams(-1, dp(48)))
+        card.addView(vSpace(10))
+        card.addView(button(
+            if (registerMode) getString(R.string.auth_switch_to_login)
+            else getString(R.string.auth_switch_to_register),
+            false
+        ) {
+            showAuthScreen(!registerMode)
+        }, LinearLayout.LayoutParams(-1, dp(44)))
+        card.addView(vSpace(16))
+        card.addView(text(getString(R.string.auth_demo_admin), 10, gold))
+        card.addView(text("Демо-аккаунт администратора предназначен только для локальной защиты проекта.", 10, textSecondary))
+        scroll.addView(card)
+        authRoot.addView(scroll, LinearLayout.LayoutParams(-1, -1))
+        setContentView(authRoot)
+    }
+
+    private fun logout() {
+        prefs.edit().remove("session_user_id").remove("session_username").apply()
+        currentUser = null
+        favorites.clear()
+        cart.clear()
+        purchased.clear()
+        completedLessons.clear()
+        showAuthScreen()
     }
 
     private fun buildShell() {
