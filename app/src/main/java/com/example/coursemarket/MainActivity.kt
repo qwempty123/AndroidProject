@@ -247,6 +247,7 @@ class MainActivity : AppCompatActivity() {
             "Каталог" -> showCatalog()
             "Избранное" -> showFavorites()
             "Корзина" -> showCart()
+            "Админ" -> showAdmin()
             "Профиль" -> {
                 val course = courses.firstOrNull { it.id == currentLearningCourseId }
                 when {
@@ -1074,6 +1075,8 @@ class MainActivity : AppCompatActivity() {
     }
 
         private fun showProfile() {
+        currentLearningCourseId = -1
+        currentLearningLessonIndex = -1
         currentTab = "Профиль"
         render(getString(R.string.profile_title), getString(R.string.profile_subtitle))
         val buyerName = prefs.getString("buyer_name", currentUser?.username.orEmpty()).orEmpty().trim()
