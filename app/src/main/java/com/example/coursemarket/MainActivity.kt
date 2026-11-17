@@ -445,7 +445,7 @@ class MainActivity : AppCompatActivity() {
         val divider = View(this).apply { setBackgroundColor(Color.rgb(49, 47, 62)) }
         root.addView(divider, LinearLayout.LayoutParams(-1, dp(1)))
 
-        screenContainerId = View.generateViewId()
+        screenContainerId = R.id.screen_container
         val screenContainer = FragmentContainerView(this).apply {
             id = screenContainerId
             setBackgroundColor(bg)
