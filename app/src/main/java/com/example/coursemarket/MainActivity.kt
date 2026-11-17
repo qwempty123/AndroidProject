@@ -729,8 +729,17 @@ class MainActivity : AppCompatActivity() {
             toggleFavorite(course)
         }, LinearLayout.LayoutParams(dp(42), dp(42)))
         priceRow.addView(hSpace(7))
-        priceRow.addView(button("В корзину", false, compact = true) {
-            addToCart(course)
+        val cartLabel = when {
+            purchased.contains(course.id) -> "Куплен"
+            cart.contains(course.id) -> "В корзине"
+            else -> "В корзину"
+        }
+        priceRow.addView(button(cartLabel, false, compact = true) {
+            when {
+                purchased.contains(course.id) -> Toast.makeText(this, "Этот курс уже куплен.", Toast.LENGTH_SHORT).show()
+                cart.contains(course.id) -> navigate("Корзина")
+                else -> addToCart(course)
+            }
         }, LinearLayout.LayoutParams(-2, dp(42)))
         card.addView(priceRow)
         card.addView(vSpace(8))
@@ -821,6 +830,7 @@ class MainActivity : AppCompatActivity() {
         body.addView(text(money(course.price), 26, textPrimary, true))
         body.addView(vSpace(12))
 
+        lateinit var dialog: AlertDialog
         val actions = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -831,7 +841,7 @@ class MainActivity : AppCompatActivity() {
             compact = true
         ) {
             toggleFavorite(course)
-            (itParentDialog(body))?.dismiss()
+            dialog.dismiss()
         }, LinearLayout.LayoutParams(0, dp(46), 1f))
         actions.addView(hSpace(8))
         actions.addView(button(
@@ -843,10 +853,12 @@ class MainActivity : AppCompatActivity() {
             true,
             compact = true
         ) {
-            addToCart(course)
-            if (cart.contains(course.id) || purchased.contains(course.id)) {
-                (itParentDialog(body))?.dismiss()
+            when {
+                purchased.contains(course.id) -> Toast.makeText(this, "Этот курс уже куплен.", Toast.LENGTH_SHORT).show()
+                cart.contains(course.id) -> navigate("Корзина")
+                else -> addToCart(course)
             }
+            dialog.dismiss()
         }, LinearLayout.LayoutParams(0, dp(46), 1f))
         body.addView(actions)
 
@@ -855,18 +867,14 @@ class MainActivity : AppCompatActivity() {
             overScrollMode = View.OVER_SCROLL_NEVER
             addView(body)
         }
-        val dialog = AlertDialog.Builder(this).setView(scroll).create()
+        dialog = AlertDialog.Builder(this).setView(scroll).create()
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.window?.setLayout(
             (resources.displayMetrics.widthPixels - dp(30)).coerceAtMost(dp(480)),
             (resources.displayMetrics.heightPixels * 0.86f).toInt()
         )
-        // Replace the closures' dialog lookup with the dialog instance after it is shown.
-        body.tag = dialog
     }
-
-    private fun itParentDialog(view: View): AlertDialog? = view.tag as? AlertDialog
 
     private fun sectionIn(parent: LinearLayout, title: String) {
         parent.addView(vSpace(16))
