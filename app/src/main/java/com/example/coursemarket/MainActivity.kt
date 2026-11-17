@@ -445,7 +445,6 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation = BottomNavigationView(this).apply {
             background = rounded(surface, 18)
             labelVisibilityMode = BottomNavigationView.LABEL_VISIBILITY_LABELED
-            itemHorizontalTranslationEnabled = false
             menu.add(0, NAV_HOME, 0, getString(R.string.nav_home))
                 .setIcon(android.R.drawable.ic_menu_view)
             menu.add(0, NAV_CATALOG, 1, getString(R.string.nav_catalog))
