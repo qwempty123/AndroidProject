@@ -927,7 +927,7 @@ class MainActivity : AppCompatActivity() {
         contentBox.addView(vSpace(12))
     }
 
-    private fun addCourseCard()course: Course, target: LinearLayout = contentBox) {
+    private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 18)
