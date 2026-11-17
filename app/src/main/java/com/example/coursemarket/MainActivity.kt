@@ -30,7 +30,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-private data class Course(
+data class Course(
     val id: Int,
     val title: String,
     val category: String,
