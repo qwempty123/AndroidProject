@@ -1,6 +1,67 @@
-
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CourseMarket</string>
     <string name="welcome_title">CourseMarket</string>
     <string name="welcome_subtitle">Learn something extraordinary.</string>
+
+    <string name="course_add_to_cart">В корзину</string>
+    <string name="course_in_cart">В корзине</string>
+    <string name="course_learn">Учиться</string>
+    <string name="course_details">Программа курса</string>
+    <string name="course_author_format">Автор: %1$s</string>
+
+    <string name="auth_title">Добро пожаловать</string>
+    <string name="auth_subtitle">Войди или создай аккаунт, чтобы сохранять обучение и покупки.</string>
+    <string name="auth_username">Логин</string>
+    <string name="auth_password">Пароль</string>
+    <string name="auth_login">Войти</string>
+    <string name="auth_register">Создать аккаунт</string>
+    <string name="auth_switch_to_register">Нет аккаунта? Зарегистрироваться</string>
+    <string name="auth_switch_to_login">Уже есть аккаунт? Войти</string>
+    <string name="auth_demo_admin">Демо-администратор: admin / admin123</string>
+    <string name="auth_login_error">Неверный логин или пароль.</string>
+    <string name="auth_logout">Выйти из аккаунта</string>
+
+    <string name="nav_home">Главная</string>
+    <string name="nav_catalog">Каталог</string>
+    <string name="nav_favorites">Избранное</string>
+    <string name="nav_cart">Корзина</string>
+    <string name="nav_profile">Профиль</string>
+
+    <string name="admin_panel">Панель администратора</string>
+    <string name="admin_courses">Управление курсами</string>
+    <string name="admin_add_course">Добавить курс</string>
+    <string name="admin_edit_course">Изменить курс</string>
+    <string name="admin_delete_course">Удалить</string>
+    <string name="admin_orders">Заказы клиентов</string>
+    <string name="admin_users">Пользователей</string>
+    <string name="admin_status">Изменить статус</string>
+    <string name="admin_only">Доступно только администратору.</string>
+
+    <string name="course_title_hint">Название курса</string>
+    <string name="course_author_hint">Преподаватель</string>
+    <string name="course_description_hint">Описание курса</string>
+    <string name="course_price_hint">Цена в рублях</string>
+    <string name="course_category_hint">Направление</string>
+
+    <string name="checkout_demo_warning">Демонстрационный режим: деньги не списываются. Не вводи данные банковской карты.</string>
+    <string name="checkout_terms">Подтверждаю, что понимаю демонстрационный режим оформления.</string>
+    <string name="checkout_confirm">Подтвердить демонстрационный заказ</string>
+    <string name="checkout_card">Банковская карта (демо)</string>
+    <string name="checkout_sbp">СБП (демо)</string>
+    <string name="checkout_invoice">Счёт на оплату (демо)</string>
+    <string name="order_created">Демонстрационный заказ создан</string>
+    <string name="order_no_charge">Списание средств не выполнялось.</string>
+
+    <string name="lesson_theory">Теория</string>
+    <string name="lesson_key_ideas">Ключевые идеи</string>
+    <string name="lesson_example">Разбор примера</string>
+    <string name="lesson_practice">Практическое задание</string>
+    <string name="lesson_quiz">Проверь себя</string>
+    <string name="lesson_check_answer">Проверить ответ</string>
+    <string name="lesson_complete">Отметить урок завершённым</string>
+    <string name="lesson_continue">Продолжить обучение</string>
+
+    <string name="database_error">Не удалось открыть локальную базу данных.</string>
+    <string name="empty_search">По вашему запросу ничего не найдено.</string>
 </resources>
