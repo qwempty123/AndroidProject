@@ -194,27 +194,29 @@ class CourseMarketDatabase(context: Context) :
                     put("outcomes_json", JSONArray(course.outcomes).toString())
                     put("is_active", 1)
                 }
-                val updated = db.update("courses", courseValues, "id = ?", arrayOf(course.id.toString()))
-                if (updated == 0) db.insertOrThrow("courses", null, courseValues)
-
-                course.modules.forEachIndexed { index, moduleTitle ->
-                    val lesson = CourseLearningContent.get(course.id, index, moduleTitle)
-                    val lessonValues = ContentValues().apply {
-                        put("course_id", course.id)
-                        put("lesson_index", index)
-                        put("title", lesson.title)
-                        put("introduction", lesson.introduction)
-                        put("key_points_json", JSONArray(lesson.keyPoints).toString())
-                        put("example", lesson.example)
-                        put("practice", lesson.practice)
-                        put("question", lesson.question)
-                        put("answers_json", JSONArray(lesson.answers).toString())
-                        put("correct_answer", lesson.correctAnswer)
-                        put("explanation", lesson.explanation)
+                val alreadySeeded = db.rawQuery(
+                    "SELECT 1 FROM courses WHERE id = ? LIMIT 1",
+                    arrayOf(course.id.toString())
+                ).use { it.moveToFirst() }
+                if (!alreadySeeded) {
+                    db.insertOrThrow("courses", null, courseValues)
+                    course.modules.forEachIndexed { index, moduleTitle ->
+                        val lesson = CourseLearningContent.get(course.id, index, moduleTitle)
+                        val lessonValues = ContentValues().apply {
+                            put("course_id", course.id)
+                            put("lesson_index", index)
+                            put("title", lesson.title)
+                            put("introduction", lesson.introduction)
+                            put("key_points_json", JSONArray(lesson.keyPoints).toString())
+                            put("example", lesson.example)
+                            put("practice", lesson.practice)
+                            put("question", lesson.question)
+                            put("answers_json", JSONArray(lesson.answers).toString())
+                            put("correct_answer", lesson.correctAnswer)
+                            put("explanation", lesson.explanation)
+                        }
+                        db.insertOrThrow("lessons", null, lessonValues)
                     }
-                    db.insertWithOnConflict(
-                        "lessons", null, lessonValues, SQLiteDatabase.CONFLICT_REPLACE
-                    )
                 }
             }
             db.setTransactionSuccessful()
