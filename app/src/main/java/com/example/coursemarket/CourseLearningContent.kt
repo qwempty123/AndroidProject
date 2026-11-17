@@ -798,6 +798,8 @@ object CourseLearningContent {
         )
     )
 
+    fun lessonCount(courseId: Int): Int = lessons[courseId]?.size ?: 0
+
     fun get(courseId: Int, lessonIndex: Int, fallbackTitle: String): CourseLessonContent {
         val authored = lessons[courseId]?.getOrNull(lessonIndex)
         return authored ?: lesson(
