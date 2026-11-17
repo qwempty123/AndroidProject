@@ -973,70 +973,89 @@ class MainActivity : AppCompatActivity() {
         buyerEmail: String,
         paymentMethod: String
     ) {
+        val account = currentUser ?: run {
+            Toast.makeText(this, "Войди в аккаунт, чтобы оформить заказ.", Toast.LENGTH_SHORT).show()
+            return
+        }
         val total = items.sumOf { it.price }
-        val orderId = "CM-" + System.currentTimeMillis().toString().takeLast(9)
-        val createdAt = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date())
-        val history = try {
-            JSONArray(prefs.getString("order_history", "[]").orEmpty())
-        } catch (_: Exception) {
-            JSONArray()
-        }
-        val order = JSONObject()
-            .put("id", orderId)
-            .put("date", createdAt)
-            .put("customer", buyerName)
-            .put("email", buyerEmail)
-            .put("method", paymentMethodName(paymentMethod))
-            .put("total", total)
-            .put("courseIds", JSONArray(items.map { it.id }))
-            .put("status", "DEMO")
-        history.put(order)
-
-        items.forEach { course ->
-            purchased.add(course.id)
-            cart.remove(course.id)
-        }
-        prefs.edit()
-            .putString("buyer_name", buyerName)
-            .putString("buyer_email", buyerEmail)
-            .putString("order_history", history.toString())
-            .apply()
-        saveState()
-        refreshHeaderAndNav()
-
-        AlertDialog.Builder(this)
-            .setTitle("Демонстрационный заказ создан")
-            .setMessage(
-                "Заказ: " + orderId +
-                    "\nДата: " + createdAt +
-                    "\nСумма: " + money(total) +
-                    "\nСпособ: " + paymentMethodName(paymentMethod) +
-                    "\n\nСписание средств не выполнялось. Курсы добавлены в раздел «Мои курсы»."
-            )
-            .setCancelable(false)
-            .setPositiveButton("Начать обучение") { _, _ ->
-                items.firstOrNull()?.let { showCourseLearning(it) } ?: showProfile()
+        uiScope.launch {
+            try {
+                val orderNumber = repository.createDemoOrder(
+                    account.id,
+                    buyerName,
+                    buyerEmail,
+                    paymentMethodName(paymentMethod),
+                    items
+                )
+                items.forEach { course ->
+                    purchased.add(course.id)
+                    cart.remove(course.id)
+                }
+                prefs.edit()
+                    .putString("buyer_name", buyerName)
+                    .putString("buyer_email", buyerEmail)
+                    .apply()
+                saveState()
+                refreshHeaderAndNav()
+                val savedOrder = repository.ordersForUser(account.id)
+                    .firstOrNull { it.number == orderNumber }
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle(getString(R.string.order_created))
+                    .setMessage(
+                        "Заказ: " + orderNumber +
+                            "\nДата: " + (savedOrder?.createdAt ?: "сейчас") +
+                            "\nСумма: " + money(total) +
+                            "\nСпособ: " + paymentMethodName(paymentMethod) +
+                            "\nСтатус: " + (savedOrder?.status ?: "CREATED_DEMO") +
+                            "\n\n" + getString(R.string.order_no_charge) +
+                            " Курсы добавлены в раздел «Мои курсы»."
+                    )
+                    .setCancelable(false)
+                    .setPositiveButton("Начать обучение") { _, _ ->
+                        items.firstOrNull()?.let { showCourseLearning(it) } ?: showProfile()
+                    }
+                    .setNegativeButton("Мои курсы") { _, _ -> showProfile() }
+                    .show()
+            } catch (error: Exception) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Не удалось создать заказ: " + (error.message ?: ""),
+                    Toast.LENGTH_LONG
+                ).show()
             }
-            .setNegativeButton("Мои курсы") { _, _ -> showProfile() }
-            .show()
+        }
     }
 
-    private fun showProfile() {
+        private fun showProfile() {
         currentTab = "Профиль"
         render("Твой профиль", "Личный кабинет CourseMarket.")
-        val buyerName = prefs.getString("buyer_name", "").orEmpty().trim()
+        val buyerName = prefs.getString("buyer_name", currentUser?.username.orEmpty()).orEmpty().trim()
         val greeting = if (buyerName.isBlank()) "Добро пожаловать!" else "Добро пожаловать, " + buyerName + "!"
         val panel = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = gradient("#302747", "#42365E", 19)
             setPadding(dp(18), dp(18), dp(18), dp(18))
         }
-        panel.addView(badge("УЧЕНИК COURSEMARKET", accentDark, accent))
+        panel.addView(badge(
+            if (currentUser?.isAdmin == true) "АДМИНИСТРАТОР COURSEMARKET" else "УЧЕНИК COURSEMARKET",
+            accentDark, accent
+        ))
         panel.addView(vSpace(12))
         panel.addView(text(greeting, 21, textPrimary, true))
         panel.addView(vSpace(5))
-        panel.addView(text("Учись в своём темпе и возвращайся к урокам в любой момент.", 12, Color.rgb(222, 216, 238)))
+        panel.addView(text(
+            "Учись в своём темпе и возвращайся к урокам в любой момент.",
+            12, Color.rgb(222, 216, 238)
+        ))
         contentBox.addView(panel)
+
+        if (currentUser?.isAdmin == true) {
+            contentBox.addView(vSpace(10))
+            contentBox.addView(button(
+                getString(R.string.admin_panel) + "  →",
+                true
+            ) { navigate("Админ") }, matchWrap())
+        }
 
         sectionTitle("Моя статистика", "Твои действия и учебный прогресс")
         val totalCompleted = completedLessons.values.sumOf { it.size }
@@ -1062,7 +1081,10 @@ class MainActivity : AppCompatActivity() {
         sectionTitle("Мои курсы", "Нажми на программу, чтобы продолжить обучение")
         val owned = courses.filter { purchased.contains(it.id) }
         if (owned.isEmpty()) {
-            contentBox.addView(emptyState("Здесь появятся твои курсы", "Выбери программу в каталоге и оформи демонстрационный заказ."))
+            contentBox.addView(emptyState(
+                "Здесь появятся твои курсы",
+                "Выбери программу в каталоге и оформи демонстрационный заказ."
+            ))
             contentBox.addView(vSpace(10))
             contentBox.addView(button("Выбрать курс", true) { navigate("Каталог") })
         } else {
@@ -1098,50 +1120,19 @@ class MainActivity : AppCompatActivity() {
                     10, if (percent == 100) success else textSecondary
                 ))
                 row.addView(labels, LinearLayout.LayoutParams(0, -2, 1f))
-                row.addView(text(if (percent == 100) "✓" else "›", 21, if (percent == 100) success else accent, true))
+                row.addView(text(
+                    if (percent == 100) "✓" else "›",
+                    21, if (percent == 100) success else accent, true
+                ))
                 contentBox.addView(row, matchWrap())
                 contentBox.addView(vSpace(8))
             }
         }
 
-        val orders = try {
-            JSONArray(prefs.getString("order_history", "[]").orEmpty())
-        } catch (_: Exception) {
-            JSONArray()
-        }
-        if (orders.length() > 0) {
-            sectionTitle("История заказов", orders.length().toString() + " оформлено на этом устройстве")
-            for (index in orders.length() - 1 downTo 0) {
-                val order = orders.optJSONObject(index) ?: continue
-                val receipt = LinearLayout(this).apply {
-                    orientation = LinearLayout.VERTICAL
-                    background = rounded(surface, 15)
-                    setPadding(dp(14), dp(13), dp(14), dp(13))
-                }
-                val header = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.CENTER_VERTICAL
-                }
-                header.addView(text(order.optString("id"), 13, accent, true),
-                    LinearLayout.LayoutParams(0, -2, 1f))
-                header.addView(text(money(order.optInt("total")), 14, textPrimary, true))
-                receipt.addView(header)
-                receipt.addView(vSpace(6))
-                receipt.addView(text(
-                    order.optString("date") + "  •  " + order.optString("method"),
-                    10, textSecondary
-                ))
-                receipt.addView(vSpace(5))
-                receipt.addView(text(
-                    "Курсов в заказе: " + (order.optJSONArray("courseIds")?.length() ?: 0),
-                    10, textSecondary
-                ))
-                receipt.addView(vSpace(5))
-                receipt.addView(text("Демо-заказ: списания средств не было.", 10, gold))
-                contentBox.addView(receipt, matchWrap())
-                contentBox.addView(vSpace(8))
-            }
-        }
+        sectionTitle("История заказов", "Оформления, сохранённые в локальной базе SQLite")
+        val orderContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        contentBox.addView(orderContainer, matchWrap())
+        loadProfileOrders(orderContainer)
 
         sectionTitle("О приложении")
         val about = LinearLayout(this).apply {
@@ -1152,14 +1143,69 @@ class MainActivity : AppCompatActivity() {
         about.addView(text("CourseMarket", 15, textPrimary, true))
         about.addView(vSpace(5))
         about.addView(text(
-            "12 учебных программ с уроками, примерами, практическими заданиями и проверочными вопросами. Покупки и учебный прогресс хранятся на этом устройстве. Оплата демонстрационная: сервер и платёжный провайдер не подключены.",
+            "12 учебных программ с уроками, примерами, практическими заданиями и проверочными вопросами. Учётные записи, каталог, заказы и учебный прогресс хранятся в SQLite. Оплата демонстрационная.",
             12, textSecondary
         ))
         contentBox.addView(about)
         contentBox.addView(vSpace(12))
+        contentBox.addView(button(getString(R.string.auth_logout), false) { logout() }, matchWrap())
     }
 
-    private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
+    private fun loadProfileOrders(container: LinearLayout) {
+        val userId = currentUser?.id ?: return
+        uiScope.launch {
+            try {
+                val orders = repository.ordersForUser(userId)
+                container.removeAllViews()
+                if (orders.isEmpty()) {
+                    container.addView(text("Заказов пока нет.", 11, textSecondary))
+                    return@launch
+                }
+                orders.forEach { order ->
+                    val card = LinearLayout(this@MainActivity).apply {
+                        orientation = LinearLayout.VERTICAL
+                        background = rounded(surface, 14)
+                        setPadding(dp(14), dp(13), dp(14), dp(13))
+                    }
+                    val heading = LinearLayout(this@MainActivity).apply {
+                        orientation = LinearLayout.HORIZONTAL
+                        gravity = Gravity.CENTER_VERTICAL
+                    }
+                    heading.addView(text(order.number, 13, accent, true),
+                        LinearLayout.LayoutParams(0, -2, 1f))
+                    heading.addView(text(money(order.total), 14, textPrimary, true))
+                    card.addView(heading)
+                    card.addView(vSpace(5))
+                    card.addView(text(
+                        order.createdAt + "  •  " + order.itemCount + " курсов",
+                        10, textSecondary
+                    ))
+                    card.addView(vSpace(4))
+                    card.addView(text(order.paymentMethod, 10, textSecondary))
+                    card.addView(vSpace(5))
+                    card.addView(text(
+                        "Статус: " + orderStatusLabel(order.status),
+                        10, if (order.status == "CANCELLED" || order.status == "REJECTED") gold else success
+                    ))
+                    card.addView(vSpace(5))
+                    card.addView(text(getString(R.string.order_no_charge), 10, gold))
+                    container.addView(card, matchWrap())
+                    container.addView(vSpace(8))
+                }
+            } catch (error: Exception) {
+                container.addView(text("Не удалось загрузить историю заказов.", 11, gold))
+            }
+        }
+    }
+
+    private fun orderStatusLabel(status: String): String = when (status) {
+        "CONFIRMED_DEMO" -> "Подтверждён (демо)"
+        "CANCELLED" -> "Отменён"
+        "REJECTED" -> "Отклонён"
+        else -> "Создан (демо)"
+    }
+
+        private fun addCourseCard(course: Course, target: LinearLayout = contentBox) {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = rounded(surface, 18)
@@ -1375,6 +1421,17 @@ class MainActivity : AppCompatActivity() {
         prefs.edit()
             .putString("progress_" + course.id, progressFor(course).sorted().joinToString(","))
             .apply()
+        val userId = currentUser?.id ?: return
+        val completed = progressFor(course).toSet()
+        uiScope.launch {
+            try {
+                completed.forEach { index ->
+                    repository.completeLesson(userId, course.id, index)
+                }
+            } catch (error: Exception) {
+                Toast.makeText(this@MainActivity, "Не удалось сохранить прогресс.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun courseProgress(course: Course): Int {
@@ -1384,6 +1441,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showCourseLearning(course: Course) {
+        currentLearningCourseId = course.id
+        currentLearningLessonIndex = -1
         currentTab = "Профиль"
         val completed = progressFor(course)
         val totalLessons = course.modules.size
@@ -1466,6 +1525,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
         currentTab = "Профиль"
+        currentLearningCourseId = course.id
+        currentLearningLessonIndex = lessonIndex
         val lesson = CourseLearningContent.get(course.id, lessonIndex, course.modules[lessonIndex])
         val completed = progressFor(course)
         val wasCompleted = lessonIndex in completed
