@@ -525,7 +525,7 @@ class MainActivity : AppCompatActivity() {
                 includeFontPadding = false
                 gravity = Gravity.CENTER
                 setTextColor(textPrimary)
-                background = rounded(course.tint, 12)
+                background = rounded(Color.parseColor(course.tint), 12)
             }
             row.addView(colorTile, LinearLayout.LayoutParams(dp(48), dp(48)))
             val labels = LinearLayout(this).apply {
@@ -637,7 +637,7 @@ class MainActivity : AppCompatActivity() {
                     includeFontPadding = false
                     gravity = Gravity.CENTER
                     setTextColor(textPrimary)
-                    background = rounded(course.tint, 11)
+                    background = rounded(Color.parseColor(course.tint), 11)
                 }
                 row.addView(icon, LinearLayout.LayoutParams(dp(44), dp(44)))
                 val labels = LinearLayout(this).apply {
